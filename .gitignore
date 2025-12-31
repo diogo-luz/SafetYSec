@@ -11,3 +11,4 @@ local.properties
 secrets.properties
 google-services.json
 .kotlin/
+reference_code
