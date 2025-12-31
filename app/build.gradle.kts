@@ -52,9 +52,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
     }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -70,7 +74,7 @@ dependencies {
     // https://firebase.google.com/docs/android/setup#available-libraries
 
     //gmaps
-    implementation("com.google.maps.android:maps-compose:6.1.2")
+    implementation("com.google.maps.android:maps-compose:7.0.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
