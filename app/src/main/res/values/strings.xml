@@ -133,4 +133,8 @@
     <string name="delete_zone_confirm">Are you sure you want to delete "%1$s"?</string>
     <string name="assign_to_protected">Assign to Protected Users</string>
     <string name="edit">Edit</string>
+
+    <!-- My Rules Section Headers -->
+    <string name="section_rules">Rules</string>
+    <string name="section_safe_zones">Safe Zones</string>
 </resources>

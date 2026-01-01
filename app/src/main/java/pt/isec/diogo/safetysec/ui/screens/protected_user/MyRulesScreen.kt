@@ -81,12 +81,7 @@ fun MyRulesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.menu_my_rules)) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
-                    }
-                }
+                title = { Text(stringResource(R.string.menu_my_rules)) }
             )
         }
     ) { innerPadding ->
@@ -115,6 +110,10 @@ fun MyRulesScreen(
                 }
             }
         } else {
+            // Get regular rules and safe zones
+            val regularRules = rulesWithAssignments.filter { it.first.type != RuleType.GEOFENCE }
+            val safeZones = rulesWithAssignments.filter { it.first.type == RuleType.GEOFENCE }
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -123,19 +122,57 @@ fun MyRulesScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 item { Spacer(modifier = Modifier.height(8.dp)) }
-                items(rulesWithAssignments) { (rule, assignment) ->
-                    MyRuleCard(
-                        rule = rule,
-                        assignment = assignment,
-                        onToggleAccepted = { accepted ->
-                            scope.launch {
-                                rulesRepository.updateAssignment(assignment.copy(isAccepted = accepted))
-                                loadRules()
-                            }
-                        },
-                        onEdit = { onEditRule(assignment.id) }
-                    )
+
+                // Rules Section
+                if (regularRules.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = stringResource(R.string.section_rules),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                    items(regularRules) { (rule, assignment) ->
+                        MyRuleCard(
+                            rule = rule,
+                            assignment = assignment,
+                            onToggleAccepted = { accepted ->
+                                scope.launch {
+                                    rulesRepository.updateAssignment(assignment.copy(isAccepted = accepted))
+                                    loadRules()
+                                }
+                            },
+                            onEdit = { onEditRule(assignment.id) }
+                        )
+                    }
                 }
+
+                // Safe Zones Section
+                if (safeZones.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = stringResource(R.string.section_safe_zones),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(vertical = 8.dp, horizontal = 0.dp).padding(top = 16.dp)
+                        )
+                    }
+                    items(safeZones) { (rule, assignment) ->
+                        MyRuleCard(
+                            rule = rule,
+                            assignment = assignment,
+                            onToggleAccepted = { accepted ->
+                                scope.launch {
+                                    rulesRepository.updateAssignment(assignment.copy(isAccepted = accepted))
+                                    loadRules()
+                                }
+                            },
+                            onEdit = { onEditRule(assignment.id) }
+                        )
+                    }
+                }
+
                 item { Spacer(modifier = Modifier.height(16.dp)) }
             }
         }
