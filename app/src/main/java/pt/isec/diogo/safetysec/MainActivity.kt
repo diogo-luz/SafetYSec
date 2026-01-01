@@ -44,6 +44,10 @@ import pt.isec.diogo.safetysec.ui.screens.protected_user.MyRulesScreen
 import pt.isec.diogo.safetysec.ui.screens.protected_user.ProtectedDashboardScreen
 import pt.isec.diogo.safetysec.ui.screens.protected_user.ProtectedProfileScreen
 import pt.isec.diogo.safetysec.ui.screens.protected_user.RuleTimeSettingsScreen
+import pt.isec.diogo.safetysec.ui.screens.protected_user.SOSCountdownScreen
+import pt.isec.diogo.safetysec.ui.screens.protected_user.AlertsSafetyScreen
+import pt.isec.diogo.safetysec.ui.screens.monitor.AlertsScreen
+import pt.isec.diogo.safetysec.ui.screens.monitor.AlertDetailScreen
 import pt.isec.diogo.safetysec.ui.theme.SafetYSecTheme
 import pt.isec.diogo.safetysec.ui.viewmodels.AuthViewModel
 import pt.isec.diogo.safetysec.ui.viewmodels.AuthViewModelFactory
@@ -438,7 +442,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 onTriggerSOS = {
-                                    // TODO: Implement SOS flow
+                                    navController.navigate(ProtectedScreen.SOSCountdown.route)
                                 }
                             )
                         }
@@ -579,6 +583,118 @@ class MainActivity : ComponentActivity() {
                         composable("protected_placeholder/{route}") { backStackEntry ->
                             val route = backStackEntry.arguments?.getString("route") ?: ""
                             PlaceholderScreen("Protected: $route\n(Coming Soon)")
+                        }
+
+                        // SOS Countdown (Protected)
+                        composable(ProtectedScreen.SOSCountdown.route) {
+                            SOSCountdownScreen(
+                                currentUser = authViewModel.currentUser,
+                                onAlertTriggered = {
+                                    // Create alert and navigate back to dashboard
+                                    scope.launch {
+                                        authViewModel.currentUser?.let { user ->
+                                            val alert = pt.isec.diogo.safetysec.data.model.Alert(
+                                                protectedUserId = user.uid,
+                                                protectedUserName = user.displayName,
+                                                triggerType = pt.isec.diogo.safetysec.data.model.AlertTriggerType.MANUAL_SOS,
+                                                status = pt.isec.diogo.safetysec.data.model.AlertStatus.ACTIVE
+                                            )
+                                            app.alertsRepository.createAlert(alert)
+                                        }
+                                    }
+                                    navController.navigate(Screen.ProtectedDashboard.route) {
+                                        popUpTo(ProtectedScreen.SOSCountdown.route) { inclusive = true }
+                                    }
+                                },
+                                onCancelled = {
+                                    navController.popBackStack()
+                                }
+                            )
+                        }
+
+                        // Alerts Safety (Protected)
+                        composable(ProtectedScreen.AlertsSafety.route) {
+                            currentProtectedRoute = ProtectedScreen.AlertsSafety.route
+                            AlertsSafetyScreen(
+                                currentUser = authViewModel.currentUser,
+                                currentUserId = authViewModel.currentUser?.uid,
+                                currentRoute = currentProtectedRoute,
+                                alertsRepository = app.alertsRepository,
+                                onNavigate = { route ->
+                                    currentProtectedRoute = route
+                                    when (route) {
+                                        ProtectedScreen.Dashboard.route -> navController.navigate(Screen.ProtectedDashboard.route) { popUpTo(Screen.ProtectedDashboard.route) { inclusive = true } }
+                                        ProtectedScreen.AlertsSafety.route -> { /* Already here */ }
+                                        ProtectedScreen.Profile.route -> navController.navigate("protected_profile") { popUpTo(ProtectedScreen.AlertsSafety.route) { inclusive = true } }
+                                        ProtectedScreen.MyMonitors.route -> navController.navigate("protected_my_monitors") { popUpTo(ProtectedScreen.AlertsSafety.route) { inclusive = true } }
+                                        ProtectedScreen.MyRules.route -> navController.navigate("protected_my_rules") { popUpTo(ProtectedScreen.AlertsSafety.route) { inclusive = true } }
+                                        else -> navController.navigate("protected_placeholder/$route")
+                                    }
+                                },
+                                onSwitchProfile = {
+                                    navController.navigate(Screen.ProfileSelection.route) {
+                                        popUpTo(Screen.ProtectedDashboard.route) { inclusive = true }
+                                    }
+                                },
+                                onLogout = {
+                                    authViewModel.logout {
+                                        navController.navigate(Screen.Login.route) {
+                                            popUpTo(0) { inclusive = true }
+                                        }
+                                    }
+                                }
+                            )
+                        }
+
+                        // Alerts (Monitor)
+                        composable(MonitorScreen.Alerts.route) {
+                            currentMonitorRoute = MonitorScreen.Alerts.route
+                            AlertsScreen(
+                                currentUser = authViewModel.currentUser,
+                                currentUserId = authViewModel.currentUser?.uid,
+                                currentRoute = currentMonitorRoute,
+                                alertsRepository = app.alertsRepository,
+                                associationRepository = app.associationRepository,
+                                onNavigate = { route ->
+                                    currentMonitorRoute = route
+                                    when (route) {
+                                        MonitorScreen.Dashboard.route -> navController.navigate(Screen.MonitorDashboard.route) { popUpTo(Screen.MonitorDashboard.route) { inclusive = true } }
+                                        MonitorScreen.Alerts.route -> { /* Already here */ }
+                                        MonitorScreen.Profile.route -> navController.navigate("monitor_profile") { popUpTo(MonitorScreen.Alerts.route) { inclusive = true } }
+                                        MonitorScreen.MyProtected.route -> navController.navigate("monitor_my_protected") { popUpTo(MonitorScreen.Alerts.route) { inclusive = true } }
+                                        MonitorScreen.Rules.route -> navController.navigate("monitor_rules") { popUpTo(MonitorScreen.Alerts.route) { inclusive = true } }
+                                        MonitorScreen.SafeZones.route -> navController.navigate("monitor_safe_zones") { popUpTo(MonitorScreen.Alerts.route) { inclusive = true } }
+                                        else -> navController.navigate("monitor_placeholder/$route")
+                                    }
+                                },
+                                onSwitchProfile = {
+                                    navController.navigate(Screen.ProfileSelection.route) {
+                                        popUpTo(Screen.MonitorDashboard.route) { inclusive = true }
+                                    }
+                                },
+                                onLogout = {
+                                    authViewModel.logout {
+                                        navController.navigate(Screen.Login.route) {
+                                            popUpTo(0) { inclusive = true }
+                                        }
+                                    }
+                                },
+                                onAlertClick = { alertId ->
+                                    navController.navigate(MonitorScreen.AlertDetail.createRoute(alertId))
+                                }
+                            )
+                        }
+
+                        // Alert Detail (Monitor)
+                        composable(MonitorScreen.AlertDetail.route) { backStackEntry ->
+                            val alertId = backStackEntry.arguments?.getString("alertId") ?: ""
+                            AlertDetailScreen(
+                                alertId = alertId,
+                                currentUser = authViewModel.currentUser,
+                                alertsRepository = app.alertsRepository,
+                                onNavigateBack = { navController.popBackStack() },
+                                onResolved = { navController.popBackStack() }
+                            )
                         }
                 }
             }

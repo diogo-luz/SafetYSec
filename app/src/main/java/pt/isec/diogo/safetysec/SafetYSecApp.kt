@@ -1,6 +1,7 @@
 package pt.isec.diogo.safetysec
 
 import android.app.Application
+import pt.isec.diogo.safetysec.data.repository.AlertsRepository
 import pt.isec.diogo.safetysec.data.repository.AssociationRepository
 import pt.isec.diogo.safetysec.data.repository.AuthRepository
 import pt.isec.diogo.safetysec.data.repository.RulesRepository
@@ -22,6 +23,10 @@ class SafetYSecApp : Application() {
 
     val rulesRepository: RulesRepository by lazy {
         RulesRepository()
+    }
+
+    val alertsRepository: AlertsRepository by lazy {
+        AlertsRepository()
     }
 
     override fun onCreate() {

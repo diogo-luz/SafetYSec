@@ -138,4 +138,41 @@
     <!-- My Rules Section Headers -->
     <string name="section_rules">Regras</string>
     <string name="section_safe_zones">Zonas Seguras</string>
+
+    <!-- Alerts -->
+    <string name="sos_countdown_title">Alerta SOS</string>
+    <string name="sos_countdown_subtitle">Os monitores serão notificados quando a contagem terminar</string>
+    <string name="cancel_sos">Cancelar SOS</string>
+    <string name="enter_pin_to_cancel">Introduza o PIN para cancelar</string>
+    <string name="pin">PIN</string>
+    <string name="incorrect_pin">PIN incorreto</string>
+    <string name="no_alerts_history">Sem alertas no histórico</string>
+    <string name="you_are_safe">Está em segurança!</string>
+    <string name="no_alerts">Sem alertas</string>
+    <string name="all_protected_safe">Todos os seus protegidos estão em segurança</string>
+    <string name="active_alerts">Alertas Ativos</string>
+    <string name="resolved_alerts">Alertas Resolvidos</string>
+    <string name="alert_details">Detalhes do Alerta</string>
+    <string name="alert_not_found">Alerta não encontrado</string>
+    <string name="alert_active">ALERTA ATIVO</string>
+    <string name="alert_resolved">Resolvido</string>
+    <string name="protected_user">Utilizador Protegido</string>
+    <string name="trigger_type">Tipo de Ativação</string>
+    <string name="triggered_at">Ativado em</string>
+    <string name="resolved_at">Resolvido em</string>
+    <string name="resolved_by_label">Resolvido por</string>
+    <string name="resolved_by">Resolvido por %1$s</string>
+    <string name="location">Localização</string>
+    <string name="location_not_available">Localização não disponível</string>
+    <string name="video_recording">Gravação de Vídeo</string>
+    <string name="play_video">Reproduzir Vídeo</string>
+    <string name="no_video_available">Vídeo não disponível</string>
+    <string name="mark_as_resolved">Marcar como Resolvido</string>
+    <string name="trigger_manual_sos">SOS Manual</string>
+    <string name="trigger_geofence">Violação de Geofence</string>
+    <string name="trigger_rule">Violação de Regra</string>
+    <string name="status_active">Ativo</string>
+    <string name="status_resolved">Resolvido</string>
+    <string name="status_cancelled">Cancelado</string>
+    <string name="unknown_user">Utilizador Desconhecido</string>
 </resources>

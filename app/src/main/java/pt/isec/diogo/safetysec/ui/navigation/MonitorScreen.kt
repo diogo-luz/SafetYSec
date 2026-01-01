@@ -13,5 +13,8 @@ sealed class MonitorScreen(val route: String) {
     data object SafeZones : MonitorScreen("monitor_safe_zones")
     data object CreateSafeZone : MonitorScreen("monitor_create_safe_zone")
     data object Alerts : MonitorScreen("monitor_alerts")
+    data object AlertDetail : MonitorScreen("monitor_alert_detail/{alertId}") {
+        fun createRoute(alertId: String) = "monitor_alert_detail/$alertId"
+    }
     data object Profile : MonitorScreen("monitor_profile")
 }
