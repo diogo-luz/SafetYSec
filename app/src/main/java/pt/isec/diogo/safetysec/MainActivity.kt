@@ -1,9 +1,11 @@
 package pt.isec.diogo.safetysec
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -64,9 +66,41 @@ class MainActivity : ComponentActivity() {
         AuthViewModelFactory(app.authRepository)
     }
 
+    // Pedir permissões de localização
+    private val askLocationPermissions = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val isGranted = permissions[android.Manifest.permission.ACCESS_COARSE_LOCATION] == true &&
+                permissions[android.Manifest.permission.ACCESS_FINE_LOCATION] == true
+        
+        if (isGranted) {
+            app.locationHandler.startLocationUpdates()
+        }
+    }
+
+    private fun verifyAndAskLocationPermissions() {
+        if (checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED ||
+            checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            askLocationPermissions.launch(
+                arrayOf(
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                    android.Manifest.permission.ACCESS_FINE_LOCATION
+                )
+            )
+        } else {
+            app.locationHandler.startLocationUpdates()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        
+        // Pedir permissões de localização
+        verifyAndAskLocationPermissions()
 
         setContent {
             SafetYSecTheme {
@@ -603,14 +637,17 @@ class MainActivity : ComponentActivity() {
                             SOSCountdownScreen(
                                 currentUser = authViewModel.currentUser,
                                 onAlertTriggered = {
-                                    // Create alert and navigate back to dashboard
+                                    // Create alert with location and navigate back to dashboard
                                     scope.launch {
                                         authViewModel.currentUser?.let { user ->
+                                            val location = app.locationHandler.currentLocation
                                             val alert = pt.isec.diogo.safetysec.data.model.Alert(
                                                 protectedUserId = user.uid,
                                                 protectedUserName = user.displayName,
                                                 triggerType = pt.isec.diogo.safetysec.data.model.AlertTriggerType.MANUAL_SOS,
-                                                status = pt.isec.diogo.safetysec.data.model.AlertStatus.ACTIVE
+                                                status = pt.isec.diogo.safetysec.data.model.AlertStatus.ACTIVE,
+                                                latitude = location?.latitude,
+                                                longitude = location?.longitude
                                             )
                                             app.alertsRepository.createAlert(alert)
                                         }

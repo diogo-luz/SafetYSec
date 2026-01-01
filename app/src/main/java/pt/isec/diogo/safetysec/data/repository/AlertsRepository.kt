@@ -1,7 +1,6 @@
 package pt.isec.diogo.safetysec.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import kotlinx.coroutines.tasks.await
 import pt.isec.diogo.safetysec.data.model.Alert
 import pt.isec.diogo.safetysec.data.model.AlertStatus
@@ -28,21 +27,21 @@ class AlertsRepository(
         
         alertsCollection
             .whereIn("protectedUserId", protectedUserIds)
-            .orderBy("createdAt", Query.Direction.DESCENDING)
             .get()
             .await()
             .documents
             .mapNotNull { mapToAlert(it.data) }
+            .sortedByDescending { it.createdAt } //client side para nao criar index no firebase
     }
 
     suspend fun getAlertHistory(protectedUserId: String): Result<List<Alert>> = runCatching {
         alertsCollection
             .whereEqualTo("protectedUserId", protectedUserId)
-            .orderBy("createdAt", Query.Direction.DESCENDING)
             .get()
             .await()
             .documents
             .mapNotNull { mapToAlert(it.data) }
+            .sortedByDescending { it.createdAt } //client side para nao criar index no firebase
     }
 
     suspend fun resolveAlert(

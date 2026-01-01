@@ -6,6 +6,7 @@ import pt.isec.diogo.safetysec.data.repository.AssociationRepository
 import pt.isec.diogo.safetysec.data.repository.AuthRepository
 import pt.isec.diogo.safetysec.data.repository.RulesRepository
 import pt.isec.diogo.safetysec.data.repository.UserRepository
+import pt.isec.diogo.safetysec.utils.LocationHandler
 
 class SafetYSecApp : Application() {
 
@@ -27,6 +28,10 @@ class SafetYSecApp : Application() {
 
     val alertsRepository: AlertsRepository by lazy {
         AlertsRepository()
+    }
+
+    val locationHandler: LocationHandler by lazy {
+        LocationHandler(this)
     }
 
     override fun onCreate() {
