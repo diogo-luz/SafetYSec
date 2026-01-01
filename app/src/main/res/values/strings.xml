@@ -117,4 +117,20 @@
     <string name="rule_type_speed_limit">Speed Limit</string>
     <string name="rule_type_inactivity">Inactivity Alert</string>
     <string name="rule_type_geofence">Safe Zone</string>
+
+    <!-- Safe Zones -->
+    <string name="create_safe_zone">Create Safe Zone</string>
+    <string name="edit_safe_zone">Edit Safe Zone</string>
+    <string name="zone_name">Zone Name</string>
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="radius_label">Radius: %1$d m</string>
+    <string name="radius_format">%1$d m</string>
+    <string name="tap_map_pick_location">Tap on the map to set location</string>
+    <string name="no_safe_zones">No safe zones yet</string>
+    <string name="tap_create_zone">Tap + to create a safe zone</string>
+    <string name="delete_zone_title">Delete Safe Zone</string>
+    <string name="delete_zone_confirm">Are you sure you want to delete "%1$s"?</string>
+    <string name="assign_to_protected">Assign to Protected Users</string>
+    <string name="edit">Edit</string>
 </resources>

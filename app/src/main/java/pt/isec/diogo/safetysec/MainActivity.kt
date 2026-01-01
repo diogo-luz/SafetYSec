@@ -32,10 +32,12 @@ import pt.isec.diogo.safetysec.ui.screens.common.RegisterScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.AddProtectedScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.AssignRuleScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.CreateRuleScreen
+import pt.isec.diogo.safetysec.ui.screens.monitor.CreateSafeZoneScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.MonitorDashboardScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.MonitorProfileScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.MyProtectedScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.RulesScreen
+import pt.isec.diogo.safetysec.ui.screens.monitor.SafeZonesScreen
 import pt.isec.diogo.safetysec.ui.screens.protected_user.AddMonitorScreen
 import pt.isec.diogo.safetysec.ui.screens.protected_user.MyMonitorsScreen
 import pt.isec.diogo.safetysec.ui.screens.protected_user.MyRulesScreen
@@ -160,6 +162,9 @@ class MainActivity : ComponentActivity() {
                                         MonitorScreen.Rules.route -> {
                                             navController.navigate("monitor_rules")
                                         }
+                                        MonitorScreen.SafeZones.route -> {
+                                            navController.navigate("monitor_safe_zones")
+                                        }
                                         else -> {
                                             navController.navigate("monitor_placeholder/$route")
                                         }
@@ -259,6 +264,43 @@ class MainActivity : ComponentActivity() {
                                 rulesRepository = app.rulesRepository,
                                 associationRepository = app.associationRepository,
                                 onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+
+                        // Safe Zones (Monitor)
+                        composable("monitor_safe_zones") {
+                            currentMonitorRoute = MonitorScreen.SafeZones.route
+                            SafeZonesScreen(
+                                currentUserId = authViewModel.currentUser?.uid,
+                                rulesRepository = app.rulesRepository,
+                                onNavigateBack = { navController.popBackStack() },
+                                onCreateZone = { navController.navigate("monitor_create_safe_zone") },
+                                onEditZone = { ruleId -> navController.navigate("monitor_edit_safe_zone/$ruleId") }
+                            )
+                        }
+
+                        // Create Safe Zone (Monitor)
+                        composable("monitor_create_safe_zone") {
+                            CreateSafeZoneScreen(
+                                currentUserId = authViewModel.currentUser?.uid,
+                                ruleId = null,
+                                rulesRepository = app.rulesRepository,
+                                associationRepository = app.associationRepository,
+                                onNavigateBack = { navController.popBackStack() },
+                                onSuccess = { navController.popBackStack() }
+                            )
+                        }
+
+                        // Edit Safe Zone (Monitor)
+                        composable("monitor_edit_safe_zone/{ruleId}") { backStackEntry ->
+                            val ruleId = backStackEntry.arguments?.getString("ruleId") ?: ""
+                            CreateSafeZoneScreen(
+                                currentUserId = authViewModel.currentUser?.uid,
+                                ruleId = ruleId,
+                                rulesRepository = app.rulesRepository,
+                                associationRepository = app.associationRepository,
+                                onNavigateBack = { navController.popBackStack() },
+                                onSuccess = { navController.popBackStack() }
                             )
                         }
 
