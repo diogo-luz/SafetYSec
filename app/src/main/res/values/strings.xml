@@ -83,4 +83,22 @@
     <string name="share_otp_subtitle">Give this code to your monitor so they can add you</string>
     <string name="otp_valid_10min">Valid for 10 minutes</string>
     <string name="generate_new_code">Generate New Code</string>
+
+    <!-- Rules -->
+    <string name="create_rule">Create Rule</string>
+    <string name="no_rules">No rules yet</string>
+    <string name="tap_create_rule">Tap + to create a rule</string>
+    <string name="rule_name">Rule Name</string>
+    <string name="rule_type">Rule Type</string>
+    <string name="max_speed_kmh">Max Speed (km/h)</string>
+    <string name="time_minutes">Time (minutes)</string>
+    <string name="assign_rule">Assign Rule</string>
+    <string name="select_protected_users">Select Protected Users</string>
+    <string name="no_rules_assigned">No rules assigned</string>
+    <string name="rule_settings">Rule Settings</string>
+    <string name="schedule_title">Schedule</string>
+    <string name="schedule_subtitle">Set when this rule should be active</string>
+    <string name="start_time">Start Time</string>
+    <string name="end_time">End Time</string>
+    <string name="accept_rule">Accept Rule</string>
 </resources>

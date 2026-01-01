@@ -83,4 +83,22 @@
     <string name="share_otp_subtitle">Dê este código ao seu monitor para que o possa adicionar</string>
     <string name="otp_valid_10min">Válido por 10 minutos</string>
     <string name="generate_new_code">Gerar Novo Código</string>
+
+    <!-- Rules -->
+    <string name="create_rule">Criar Regra</string>
+    <string name="no_rules">Ainda sem regras</string>
+    <string name="tap_create_rule">Toque em + para criar uma regra</string>
+    <string name="rule_name">Nome da Regra</string>
+    <string name="rule_type">Tipo de Regra</string>
+    <string name="max_speed_kmh">Velocidade Máxima (km/h)</string>
+    <string name="time_minutes">Tempo (minutos)</string>
+    <string name="assign_rule">Atribuir Regra</string>
+    <string name="select_protected_users">Selecionar Utilizadores Protegidos</string>
+    <string name="no_rules_assigned">Nenhuma regra atribuída</string>
+    <string name="rule_settings">Definições da Regra</string>
+    <string name="schedule_title">Horário</string>
+    <string name="schedule_subtitle">Defina quando esta regra deve estar ativa</string>
+    <string name="start_time">Hora de Início</string>
+    <string name="end_time">Hora de Fim</string>
+    <string name="accept_rule">Aceitar Regra</string>
 </resources>

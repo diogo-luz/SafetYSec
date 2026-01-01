@@ -30,13 +30,18 @@ import pt.isec.diogo.safetysec.ui.screens.common.LoginScreen
 import pt.isec.diogo.safetysec.ui.screens.common.ProfileSelectionScreen
 import pt.isec.diogo.safetysec.ui.screens.common.RegisterScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.AddProtectedScreen
+import pt.isec.diogo.safetysec.ui.screens.monitor.AssignRuleScreen
+import pt.isec.diogo.safetysec.ui.screens.monitor.CreateRuleScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.MonitorDashboardScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.MonitorProfileScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.MyProtectedScreen
+import pt.isec.diogo.safetysec.ui.screens.monitor.RulesScreen
 import pt.isec.diogo.safetysec.ui.screens.protected_user.AddMonitorScreen
 import pt.isec.diogo.safetysec.ui.screens.protected_user.MyMonitorsScreen
+import pt.isec.diogo.safetysec.ui.screens.protected_user.MyRulesScreen
 import pt.isec.diogo.safetysec.ui.screens.protected_user.ProtectedDashboardScreen
 import pt.isec.diogo.safetysec.ui.screens.protected_user.ProtectedProfileScreen
+import pt.isec.diogo.safetysec.ui.screens.protected_user.RuleTimeSettingsScreen
 import pt.isec.diogo.safetysec.ui.theme.SafetYSecTheme
 import pt.isec.diogo.safetysec.ui.viewmodels.AuthViewModel
 import pt.isec.diogo.safetysec.ui.viewmodels.AuthViewModelFactory
@@ -152,6 +157,9 @@ class MainActivity : ComponentActivity() {
                                         MonitorScreen.MyProtected.route -> {
                                             navController.navigate("monitor_my_protected")
                                         }
+                                        MonitorScreen.Rules.route -> {
+                                            navController.navigate("monitor_rules")
+                                        }
                                         else -> {
                                             navController.navigate("monitor_placeholder/$route")
                                         }
@@ -220,6 +228,40 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        // Rules (Monitor)
+                        composable("monitor_rules") {
+                            currentMonitorRoute = MonitorScreen.Rules.route
+                            RulesScreen(
+                                currentUserId = authViewModel.currentUser?.uid,
+                                rulesRepository = app.rulesRepository,
+                                onNavigateBack = { navController.popBackStack() },
+                                onCreateRule = { navController.navigate("monitor_create_rule") },
+                                onAssignRule = { ruleId -> navController.navigate("monitor_assign_rule/$ruleId") }
+                            )
+                        }
+
+                        // Create Rule (Monitor)
+                        composable("monitor_create_rule") {
+                            CreateRuleScreen(
+                                currentUserId = authViewModel.currentUser?.uid,
+                                rulesRepository = app.rulesRepository,
+                                onNavigateBack = { navController.popBackStack() },
+                                onSuccess = { navController.popBackStack() }
+                            )
+                        }
+
+                        // Assign Rule (Monitor)
+                        composable("monitor_assign_rule/{ruleId}") { backStackEntry ->
+                            val ruleId = backStackEntry.arguments?.getString("ruleId") ?: ""
+                            AssignRuleScreen(
+                                currentUserId = authViewModel.currentUser?.uid,
+                                ruleId = ruleId,
+                                rulesRepository = app.rulesRepository,
+                                associationRepository = app.associationRepository,
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+
                         // Monitor Placeholder screens
                         composable("monitor_placeholder/{route}") { backStackEntry ->
                             val route = backStackEntry.arguments?.getString("route") ?: ""
@@ -241,6 +283,9 @@ class MainActivity : ComponentActivity() {
                                         }
                                         ProtectedScreen.MyMonitors.route -> {
                                             navController.navigate("protected_my_monitors")
+                                        }
+                                        ProtectedScreen.MyRules.route -> {
+                                            navController.navigate("protected_my_rules")
                                         }
                                         else -> {
                                             navController.navigate("protected_placeholder/$route")
@@ -307,6 +352,29 @@ class MainActivity : ComponentActivity() {
                                 onNavigateBack = {
                                     navController.popBackStack()
                                 }
+                            )
+                        }
+
+                        // My Rules (Protected)
+                        composable("protected_my_rules") {
+                            currentProtectedRoute = ProtectedScreen.MyRules.route
+                            MyRulesScreen(
+                                currentUserId = authViewModel.currentUser?.uid,
+                                rulesRepository = app.rulesRepository,
+                                onNavigateBack = { navController.popBackStack() },
+                                onEditRule = { assignmentId ->
+                                    navController.navigate("protected_rule_settings/$assignmentId")
+                                }
+                            )
+                        }
+
+                        // Rule Time Settings (Protected)
+                        composable("protected_rule_settings/{assignmentId}") { backStackEntry ->
+                            val assignmentId = backStackEntry.arguments?.getString("assignmentId") ?: ""
+                            RuleTimeSettingsScreen(
+                                assignmentId = assignmentId,
+                                rulesRepository = app.rulesRepository,
+                                onNavigateBack = { navController.popBackStack() }
                             )
                         }
 

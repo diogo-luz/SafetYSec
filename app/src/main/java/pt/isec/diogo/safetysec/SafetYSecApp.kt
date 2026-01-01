@@ -3,11 +3,9 @@ package pt.isec.diogo.safetysec
 import android.app.Application
 import pt.isec.diogo.safetysec.data.repository.AssociationRepository
 import pt.isec.diogo.safetysec.data.repository.AuthRepository
+import pt.isec.diogo.safetysec.data.repository.RulesRepository
 import pt.isec.diogo.safetysec.data.repository.UserRepository
 
-/**
- * inicialização lazy para singletons como na app da lista de contactos
- */
 class SafetYSecApp : Application() {
 
     val authRepository: AuthRepository by lazy {
@@ -20,6 +18,10 @@ class SafetYSecApp : Application() {
 
     val associationRepository: AssociationRepository by lazy {
         AssociationRepository()
+    }
+
+    val rulesRepository: RulesRepository by lazy {
+        RulesRepository()
     }
 
     override fun onCreate() {
