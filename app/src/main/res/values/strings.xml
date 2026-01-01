@@ -156,7 +156,6 @@
     <string name="alert_not_found">Alert not found</string>
     <string name="alert_active">ACTIVE ALERT</string>
     <string name="alert_resolved">Resolved</string>
-    <string name="protected_user">Protected User</string>
     <string name="trigger_type">Trigger Type</string>
     <string name="triggered_at">Triggered At</string>
     <string name="resolved_at">Resolved At</string>
@@ -169,8 +168,11 @@
     <string name="no_video_available">No video available</string>
     <string name="mark_as_resolved">Mark as Resolved</string>
     <string name="trigger_manual_sos">Manual SOS</string>
+    <string name="trigger_fall_detection">Fall Detection</string>
+    <string name="trigger_accident_detection">Accident Detection</string>
+    <string name="trigger_speed_limit">Speed Limit Violation</string>
+    <string name="trigger_inactivity">Inactivity Alert</string>
     <string name="trigger_geofence">Geofence Violation</string>
-    <string name="trigger_rule">Rule Violation</string>
     <string name="status_active">Active</string>
     <string name="status_resolved">Resolved</string>
     <string name="status_cancelled">Cancelled</string>

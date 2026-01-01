@@ -19,9 +19,12 @@ data class Alert(
 )
 
 enum class AlertTriggerType {
-    MANUAL_SOS,         // Botão SOS manual
-    GEOFENCE_VIOLATION, // Saída de zona segura
-    RULE_VIOLATION      // Violação de regra (velocidade, etc)
+    MANUAL_SOS,          // Botão de pânico
+    FALL_DETECTION,      // Deteção automática de queda (sensor)
+    ACCIDENT_DETECTION,  // Deteção automática de acidente (sensor)
+    SPEED_LIMIT,         // Limite de velocidade
+    INACTIVITY,          // Inatividade
+    GEOFENCE_VIOLATION   // Geofencing
 }
 
 enum class AlertStatus {

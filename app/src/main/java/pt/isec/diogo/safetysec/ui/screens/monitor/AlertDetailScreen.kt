@@ -168,7 +168,7 @@ private fun AlertDetailContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertially,
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
                 Icon(
@@ -406,7 +406,10 @@ private fun VideoPlaceholder() {
 private fun getDetailTriggerTypeDisplayName(type: AlertTriggerType): String {
     return when (type) {
         AlertTriggerType.MANUAL_SOS -> stringResource(R.string.trigger_manual_sos)
+        AlertTriggerType.FALL_DETECTION -> stringResource(R.string.trigger_fall_detection)
+        AlertTriggerType.ACCIDENT_DETECTION -> stringResource(R.string.trigger_accident_detection)
+        AlertTriggerType.SPEED_LIMIT -> stringResource(R.string.trigger_speed_limit)
+        AlertTriggerType.INACTIVITY -> stringResource(R.string.trigger_inactivity)
         AlertTriggerType.GEOFENCE_VIOLATION -> stringResource(R.string.trigger_geofence)
-        AlertTriggerType.RULE_VIOLATION -> stringResource(R.string.trigger_rule)
     }
 }
