@@ -1,4 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SafetYSec</string>
+
+    <!-- Login Screen -->
+    <string name="login">Entrar</string>
+    <string name="login_subtitle">Inicie sessão para continuar</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="no_account_register">Não tem conta? Registe-se</string>
+
+    <!-- Register Screen -->
+    <string name="register">Registar</string>
+    <string name="create_account">Criar Conta</string>
+    <string name="register_subtitle">Registe-se para começar</string>
+    <string name="display_name">Nome</string>
+    <string name="confirm_password">Confirmar Password</string>
+    <string name="already_have_account">Já tem conta? Entre</string>
+
+    <!-- Profile Selection Screen -->
+    <string name="welcome_back">Bem-vindo de volta</string>
+    <string name="select_profile">Selecione o seu perfil para continuar</string>
+    <string name="monitor">Monitor</string>
+    <string name="monitor_description">Acompanhe e proteja os seus entes queridos</string>
+    <string name="protected_user">Protegido</string>
+    <string name="protected_description">Mantenha-se seguro com monitorização</string>
+    <string name="logout">Terminar Sessão</string>
+
+    <!-- Common -->
+    <string name="error_fill_all_fields">Por favor, preencha todos os campos</string>
+    <string name="error_passwords_mismatch">As passwords não coincidem</string>
+    <string name="error_password_too_short">A password deve ter pelo menos 6 caracteres</string>
+    <string name="loading">A carregar…</string>
 </resources>

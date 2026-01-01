@@ -1,3 +1,33 @@
 <resources>
     <string name="app_name">SafetYSec</string>
+
+    <!-- Login Screen -->
+    <string name="login">Login</string>
+    <string name="login_subtitle">Sign in to continue</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="no_account_register">Don\'t have an account? Register</string>
+
+    <!-- Register Screen -->
+    <string name="register">Register</string>
+    <string name="create_account">Create Account</string>
+    <string name="register_subtitle">Sign up to get started</string>
+    <string name="display_name">Display Name</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="already_have_account">Already have an account? Login</string>
+
+    <!-- Profile Selection Screen -->
+    <string name="welcome_back">Welcome back</string>
+    <string name="select_profile">Select your profile to continue</string>
+    <string name="monitor">Monitor</string>
+    <string name="monitor_description">Track and protect your loved ones</string>
+    <string name="protected_user">Protected</string>
+    <string name="protected_description">Stay safe with monitoring</string>
+    <string name="logout">Logout</string>
+
+    <!-- Common -->
+    <string name="error_fill_all_fields">Please fill in all fields</string>
+    <string name="error_passwords_mismatch">Passwords do not match</string>
+    <string name="error_password_too_short">Password must be at least 6 characters</string>
+    <string name="loading">Loading…</string>
 </resources>
