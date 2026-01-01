@@ -24,6 +24,42 @@
     <string name="protected_user">Protected</string>
     <string name="protected_description">Stay safe with monitoring</string>
     <string name="logout">Logout</string>
+    <string name="switch_profile">Switch Profile</string>
+
+    <!-- Menu Items -->
+    <string name="menu">Menu</string>
+    <string name="menu_dashboard">Dashboard</string>
+    <string name="menu_my_protected">My Protected Users</string>
+    <string name="menu_my_monitors">My Monitors</string>
+    <string name="menu_rules">Rules</string>
+    <string name="menu_my_rules">My Rules</string>
+    <string name="menu_safe_zones">Safe Zones</string>
+    <string name="menu_alerts">Alerts</string>
+    <string name="menu_profile">Profile</string>
+
+    <!-- Monitor Dashboard -->
+    <string name="monitor_dashboard_title">Monitor Dashboard</string>
+    <string name="protected_users_count">%d Protected Users</string>
+    <string name="no_active_alerts">No active alerts</string>
+
+    <!-- Protected Dashboard -->
+    <string name="protected_dashboard_title">My Safety</string>
+    <string name="status_safe">You are Safe</string>
+    <string name="all_systems_normal">All systems are normal</string>
+    <string name="monitors_active">Active Monitors</string>
+    <string name="rules_active">Active Rules</string>
+    <string name="sos_help_text">Press the SOS button to alert your monitors</string>
+
+    <!-- Profile -->
+    <string name="back">Back</string>
+    <string name="save">Save</string>
+    <string name="profile_monitor_info">Your monitors will see this information</string>
+    <string name="safety_settings">Safety Settings</string>
+    <string name="cancellation_pin">Cancellation PIN</string>
+    <string name="pin_hint">4-digit PIN to cancel SOS alerts</string>
+    <string name="cancellation_timer">Alert Countdown</string>
+    <string name="seconds_format">%d seconds</string>
+    <string name="timer_hint">Time before alert is sent to monitors</string>
 
     <!-- Common -->
     <string name="error_fill_all_fields">Please fill in all fields</string>

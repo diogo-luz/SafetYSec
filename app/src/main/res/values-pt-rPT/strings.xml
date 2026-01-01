@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SafetYSec</string>
 
@@ -21,10 +20,46 @@
     <string name="welcome_back">Bem-vindo de volta</string>
     <string name="select_profile">Selecione o seu perfil para continuar</string>
     <string name="monitor">Monitor</string>
-    <string name="monitor_description">Acompanhe e proteja os seus entes queridos</string>
+    <string name="monitor_description">Acompanhe e proteja os seus</string>
     <string name="protected_user">Protegido</string>
-    <string name="protected_description">Mantenha-se seguro com monitorização</string>
+    <string name="protected_description">Fique seguro com monitorização</string>
     <string name="logout">Terminar Sessão</string>
+    <string name="switch_profile">Mudar Perfil</string>
+
+    <!-- Menu Items -->
+    <string name="menu">Menu</string>
+    <string name="menu_dashboard">Dashboard</string>
+    <string name="menu_my_protected">Os Meus Protegidos</string>
+    <string name="menu_my_monitors">Os Meus Monitores</string>
+    <string name="menu_rules">Regras</string>
+    <string name="menu_my_rules">As Minhas Regras</string>
+    <string name="menu_safe_zones">Zonas Seguras</string>
+    <string name="menu_alerts">Alertas</string>
+    <string name="menu_profile">Perfil</string>
+
+    <!-- Monitor Dashboard -->
+    <string name="monitor_dashboard_title">Dashboard Monitor</string>
+    <string name="protected_users_count">%d Utilizadores Protegidos</string>
+    <string name="no_active_alerts">Sem alertas ativos</string>
+
+    <!-- Protected Dashboard -->
+    <string name="protected_dashboard_title">A Minha Segurança</string>
+    <string name="status_safe">Está Seguro</string>
+    <string name="all_systems_normal">Todos os sistemas normais</string>
+    <string name="monitors_active">Monitores Ativos</string>
+    <string name="rules_active">Regras Ativas</string>
+    <string name="sos_help_text">Pressione o botão SOS para alertar os seus monitores</string>
+
+    <!-- Profile -->
+    <string name="back">Voltar</string>
+    <string name="save">Guardar</string>
+    <string name="profile_monitor_info">Os seus monitores verão esta informação</string>
+    <string name="safety_settings">Definições de Segurança</string>
+    <string name="cancellation_pin">PIN de Cancelamento</string>
+    <string name="pin_hint">PIN de 4 dígitos para cancelar alertas SOS</string>
+    <string name="cancellation_timer">Contagem Decrescente</string>
+    <string name="seconds_format">%d segundos</string>
+    <string name="timer_hint">Tempo antes do alerta ser enviado aos monitores</string>
 
     <!-- Common -->
     <string name="error_fill_all_fields">Por favor, preencha todos os campos</string>
