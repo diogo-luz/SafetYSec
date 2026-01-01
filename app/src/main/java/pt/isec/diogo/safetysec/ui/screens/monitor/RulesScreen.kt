@@ -14,12 +14,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Rule
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Rule
+import androidx.compose.material.icons.filled.GroupAdd
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,11 +27,9 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,28 +46,33 @@ import kotlinx.coroutines.launch
 import pt.isec.diogo.safetysec.R
 import pt.isec.diogo.safetysec.data.model.Rule
 import pt.isec.diogo.safetysec.data.model.RuleType
+import pt.isec.diogo.safetysec.data.model.User
 import pt.isec.diogo.safetysec.data.repository.RulesRepository
+import pt.isec.diogo.safetysec.ui.components.DrawerScaffold
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RulesScreen(
+    currentUser: User?,
     currentUserId: String?,
+    currentRoute: String,
     rulesRepository: RulesRepository,
-    onNavigateBack: () -> Unit,
+    onNavigate: (String) -> Unit,
+    onSwitchProfile: () -> Unit,
+    onLogout: () -> Unit,
     onCreateRule: () -> Unit,
     onAssignRule: (String) -> Unit
 ) {
+    val scope = rememberCoroutineScope()
     var rules by remember { mutableStateOf<List<Rule>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var ruleToDelete by remember { mutableStateOf<Rule?>(null) }
-    val scope = rememberCoroutineScope()
 
     fun loadRules() {
         currentUserId?.let { uid ->
             scope.launch {
                 rulesRepository.getRulesByMonitor(uid)
                     .onSuccess { result ->
-                        rules = result
+                        rules = result.filter { it.type != RuleType.GEOFENCE }
                         isLoading = false
                     }
                     .onFailure {
@@ -111,12 +113,14 @@ fun RulesScreen(
         )
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.menu_rules)) }
-            )
-        },
+    DrawerScaffold(
+        currentUser = currentUser,
+        currentRoute = currentRoute,
+        title = stringResource(R.string.menu_rules),
+        menuItems = getMonitorMenuItems(),
+        onNavigate = onNavigate,
+        onSwitchProfile = onSwitchProfile,
+        onLogout = onLogout,
         floatingActionButton = {
             FloatingActionButton(onClick = onCreateRule) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.create_rule))
@@ -164,9 +168,9 @@ fun RulesScreen(
                 items(rules) { rule ->
                     RuleCard(
                         rule = rule,
-                        onToggle = { isActive ->
+                        onToggleActive = { active ->
                             scope.launch {
-                                rulesRepository.updateRule(rule.copy(isActive = isActive))
+                                rulesRepository.updateRule(rule.copy(isActive = active))
                                 loadRules()
                             }
                         },
@@ -184,12 +188,11 @@ fun RulesScreen(
 @Composable
 private fun RuleCard(
     rule: Rule,
-    onToggle: (Boolean) -> Unit,
+    onToggleActive: (Boolean) -> Unit,
     onAssign: () -> Unit,
     onDelete: () -> Unit
 ) {
     Card(
-        onClick = onAssign,
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
@@ -214,14 +217,9 @@ private fun RuleCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                rule.threshold?.let { threshold ->
-                    Text(
-                        text = getThresholdLabel(rule.type, threshold),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
             }
+
+            Spacer(modifier = Modifier.width(8.dp))
 
             IconButton(onClick = onDelete) {
                 Icon(
@@ -231,18 +229,18 @@ private fun RuleCard(
                 )
             }
 
+            IconButton(onClick = onAssign) {
+                Icon(
+                    Icons.Default.GroupAdd,
+                    contentDescription = stringResource(R.string.assign),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
             Switch(
                 checked = rule.isActive,
-                onCheckedChange = onToggle
+                onCheckedChange = onToggleActive
             )
         }
     }
-}
-
-@Composable
-private fun getThresholdLabel(type: RuleType, threshold: Double): String = when (type) {
-    RuleType.SPEED_LIMIT -> "${threshold.toInt()} km/h"
-    RuleType.INACTIVITY -> "${threshold.toInt()} min"
-    RuleType.GEOFENCE -> "${threshold.toInt()} m radius"
-    else -> ""
 }

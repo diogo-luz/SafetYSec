@@ -9,22 +9,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -39,15 +32,18 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import pt.isec.diogo.safetysec.R
 import pt.isec.diogo.safetysec.data.model.User
+import pt.isec.diogo.safetysec.ui.components.DrawerScaffold
 
 /**
  * Ecrã de perfil do Protected com definições de PIN e timer
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProtectedProfileScreen(
     currentUser: User?,
-    onNavigateBack: () -> Unit,
+    currentRoute: String,
+    onNavigate: (String) -> Unit,
+    onSwitchProfile: () -> Unit,
+    onLogout: () -> Unit,
     onSaveProfile: (displayName: String, pin: String, timer: Int) -> Unit
 ) {
     var displayName by remember { mutableStateOf(currentUser?.displayName ?: "") }
@@ -57,12 +53,14 @@ fun ProtectedProfileScreen(
     }
     var isEditing by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.menu_profile)) }
-            )
-        }
+    DrawerScaffold(
+        currentUser = currentUser,
+        currentRoute = currentRoute,
+        title = stringResource(R.string.menu_profile),
+        menuItems = getProtectedMenuItems(),
+        onNavigate = onNavigate,
+        onSwitchProfile = onSwitchProfile,
+        onLogout = onLogout
     ) { innerPadding ->
         Column(
             modifier = Modifier

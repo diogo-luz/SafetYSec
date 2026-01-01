@@ -190,8 +190,29 @@ class MainActivity : ComponentActivity() {
                             currentMonitorRoute = MonitorScreen.Profile.route
                             MonitorProfileScreen(
                                 currentUser = authViewModel.currentUser,
-                                onNavigateBack = {
-                                    navController.popBackStack()
+                                currentRoute = currentMonitorRoute,
+                                onNavigate = { route ->
+                                    currentMonitorRoute = route
+                                    when (route) {
+                                        MonitorScreen.Dashboard.route -> navController.navigate(Screen.MonitorDashboard.route) { popUpTo(Screen.MonitorDashboard.route) { inclusive = true } }
+                                        MonitorScreen.Profile.route -> { /* Already here */ }
+                                        MonitorScreen.MyProtected.route -> navController.navigate("monitor_my_protected") { popUpTo("monitor_profile") { inclusive = true } }
+                                        MonitorScreen.Rules.route -> navController.navigate("monitor_rules") { popUpTo("monitor_profile") { inclusive = true } }
+                                        MonitorScreen.SafeZones.route -> navController.navigate("monitor_safe_zones") { popUpTo("monitor_profile") { inclusive = true } }
+                                        else -> navController.navigate("monitor_placeholder/$route")
+                                    }
+                                },
+                                onSwitchProfile = {
+                                    navController.navigate(Screen.ProfileSelection.route) {
+                                        popUpTo(Screen.MonitorDashboard.route) { inclusive = true }
+                                    }
+                                },
+                                onLogout = {
+                                    authViewModel.logout {
+                                        navController.navigate(Screen.Login.route) {
+                                            popUpTo(0) { inclusive = true }
+                                        }
+                                    }
                                 },
                                 onSaveProfile = { displayName ->
                                     authViewModel.currentUser?.uid?.let { uid ->
@@ -208,10 +229,32 @@ class MainActivity : ComponentActivity() {
                         composable("monitor_my_protected") {
                             currentMonitorRoute = MonitorScreen.MyProtected.route
                             MyProtectedScreen(
+                                currentUser = authViewModel.currentUser,
                                 currentUserId = authViewModel.currentUser?.uid,
+                                currentRoute = currentMonitorRoute,
                                 associationRepository = app.associationRepository,
-                                onNavigateBack = {
-                                    navController.popBackStack()
+                                onNavigate = { route ->
+                                    currentMonitorRoute = route
+                                    when (route) {
+                                        MonitorScreen.Dashboard.route -> navController.navigate(Screen.MonitorDashboard.route) { popUpTo(Screen.MonitorDashboard.route) { inclusive = true } }
+                                        MonitorScreen.Profile.route -> navController.navigate("monitor_profile") { popUpTo("monitor_my_protected") { inclusive = true } }
+                                        MonitorScreen.MyProtected.route -> { /* Already here */ }
+                                        MonitorScreen.Rules.route -> navController.navigate("monitor_rules") { popUpTo("monitor_my_protected") { inclusive = true } }
+                                        MonitorScreen.SafeZones.route -> navController.navigate("monitor_safe_zones") { popUpTo("monitor_my_protected") { inclusive = true } }
+                                        else -> navController.navigate("monitor_placeholder/$route")
+                                    }
+                                },
+                                onSwitchProfile = {
+                                    navController.navigate(Screen.ProfileSelection.route) {
+                                        popUpTo(Screen.MonitorDashboard.route) { inclusive = true }
+                                    }
+                                },
+                                onLogout = {
+                                    authViewModel.logout {
+                                        navController.navigate(Screen.Login.route) {
+                                            popUpTo(0) { inclusive = true }
+                                        }
+                                    }
                                 },
                                 onAddProtected = {
                                     navController.navigate("monitor_add_protected")
@@ -237,9 +280,33 @@ class MainActivity : ComponentActivity() {
                         composable("monitor_rules") {
                             currentMonitorRoute = MonitorScreen.Rules.route
                             RulesScreen(
+                                currentUser = authViewModel.currentUser,
                                 currentUserId = authViewModel.currentUser?.uid,
+                                currentRoute = currentMonitorRoute,
                                 rulesRepository = app.rulesRepository,
-                                onNavigateBack = { navController.popBackStack() },
+                                onNavigate = { route ->
+                                    currentMonitorRoute = route
+                                    when (route) {
+                                        MonitorScreen.Dashboard.route -> navController.navigate(Screen.MonitorDashboard.route) { popUpTo(Screen.MonitorDashboard.route) { inclusive = true } }
+                                        MonitorScreen.Profile.route -> navController.navigate("monitor_profile") { popUpTo("monitor_rules") { inclusive = true } }
+                                        MonitorScreen.MyProtected.route -> navController.navigate("monitor_my_protected") { popUpTo("monitor_rules") { inclusive = true } }
+                                        MonitorScreen.Rules.route -> { /* Already here */ }
+                                        MonitorScreen.SafeZones.route -> navController.navigate("monitor_safe_zones") { popUpTo("monitor_rules") { inclusive = true } }
+                                        else -> navController.navigate("monitor_placeholder/$route")
+                                    }
+                                },
+                                onSwitchProfile = {
+                                    navController.navigate(Screen.ProfileSelection.route) {
+                                        popUpTo(Screen.MonitorDashboard.route) { inclusive = true }
+                                    }
+                                },
+                                onLogout = {
+                                    authViewModel.logout {
+                                        navController.navigate(Screen.Login.route) {
+                                            popUpTo(0) { inclusive = true }
+                                        }
+                                    }
+                                },
                                 onCreateRule = { navController.navigate("monitor_create_rule") },
                                 onAssignRule = { ruleId -> navController.navigate("monitor_assign_rule/$ruleId") }
                             )
@@ -271,9 +338,33 @@ class MainActivity : ComponentActivity() {
                         composable("monitor_safe_zones") {
                             currentMonitorRoute = MonitorScreen.SafeZones.route
                             SafeZonesScreen(
+                                currentUser = authViewModel.currentUser,
                                 currentUserId = authViewModel.currentUser?.uid,
+                                currentRoute = currentMonitorRoute,
                                 rulesRepository = app.rulesRepository,
-                                onNavigateBack = { navController.popBackStack() },
+                                onNavigate = { route ->
+                                    currentMonitorRoute = route
+                                    when (route) {
+                                        MonitorScreen.Dashboard.route -> navController.navigate(Screen.MonitorDashboard.route) { popUpTo(Screen.MonitorDashboard.route) { inclusive = true } }
+                                        MonitorScreen.Profile.route -> navController.navigate("monitor_profile") { popUpTo("monitor_safe_zones") { inclusive = true } }
+                                        MonitorScreen.MyProtected.route -> navController.navigate("monitor_my_protected") { popUpTo("monitor_safe_zones") { inclusive = true } }
+                                        MonitorScreen.Rules.route -> navController.navigate("monitor_rules") { popUpTo("monitor_safe_zones") { inclusive = true } }
+                                        MonitorScreen.SafeZones.route -> { /* Already here */ }
+                                        else -> navController.navigate("monitor_placeholder/$route")
+                                    }
+                                },
+                                onSwitchProfile = {
+                                    navController.navigate(Screen.ProfileSelection.route) {
+                                        popUpTo(Screen.MonitorDashboard.route) { inclusive = true }
+                                    }
+                                },
+                                onLogout = {
+                                    authViewModel.logout {
+                                        navController.navigate(Screen.Login.route) {
+                                            popUpTo(0) { inclusive = true }
+                                        }
+                                    }
+                                },
                                 onCreateZone = { navController.navigate("monitor_create_safe_zone") },
                                 onEditZone = { ruleId -> navController.navigate("monitor_edit_safe_zone/$ruleId") }
                             )
@@ -357,8 +448,28 @@ class MainActivity : ComponentActivity() {
                             currentProtectedRoute = ProtectedScreen.Profile.route
                             ProtectedProfileScreen(
                                 currentUser = authViewModel.currentUser,
-                                onNavigateBack = {
-                                    navController.popBackStack()
+                                currentRoute = currentProtectedRoute,
+                                onNavigate = { route ->
+                                    currentProtectedRoute = route
+                                    when (route) {
+                                        ProtectedScreen.Dashboard.route -> navController.navigate(Screen.ProtectedDashboard.route) { popUpTo(Screen.ProtectedDashboard.route) { inclusive = true } }
+                                        ProtectedScreen.Profile.route -> { /* Already here */ }
+                                        ProtectedScreen.MyMonitors.route -> navController.navigate("protected_my_monitors") { popUpTo("protected_profile") { inclusive = true } }
+                                        ProtectedScreen.MyRules.route -> navController.navigate("protected_my_rules") { popUpTo("protected_profile") { inclusive = true } }
+                                        else -> navController.navigate("protected_placeholder/$route")
+                                    }
+                                },
+                                onSwitchProfile = {
+                                    navController.navigate(Screen.ProfileSelection.route) {
+                                        popUpTo(Screen.ProtectedDashboard.route) { inclusive = true }
+                                    }
+                                },
+                                onLogout = {
+                                    authViewModel.logout {
+                                        navController.navigate(Screen.Login.route) {
+                                            popUpTo(0) { inclusive = true }
+                                        }
+                                    }
                                 },
                                 onSaveProfile = { displayName, pin, timer ->
                                     authViewModel.currentUser?.uid?.let { uid ->
@@ -375,10 +486,31 @@ class MainActivity : ComponentActivity() {
                         composable("protected_my_monitors") {
                             currentProtectedRoute = ProtectedScreen.MyMonitors.route
                             MyMonitorsScreen(
+                                currentUser = authViewModel.currentUser,
                                 currentUserId = authViewModel.currentUser?.uid,
+                                currentRoute = currentProtectedRoute,
                                 associationRepository = app.associationRepository,
-                                onNavigateBack = {
-                                    navController.popBackStack()
+                                onNavigate = { route ->
+                                    currentProtectedRoute = route
+                                    when (route) {
+                                        ProtectedScreen.Dashboard.route -> navController.navigate(Screen.ProtectedDashboard.route) { popUpTo(Screen.ProtectedDashboard.route) { inclusive = true } }
+                                        ProtectedScreen.Profile.route -> navController.navigate("protected_profile") { popUpTo("protected_my_monitors") { inclusive = true } }
+                                        ProtectedScreen.MyMonitors.route -> { /* Already here */ }
+                                        ProtectedScreen.MyRules.route -> navController.navigate("protected_my_rules") { popUpTo("protected_my_monitors") { inclusive = true } }
+                                        else -> navController.navigate("protected_placeholder/$route")
+                                    }
+                                },
+                                onSwitchProfile = {
+                                    navController.navigate(Screen.ProfileSelection.route) {
+                                        popUpTo(Screen.ProtectedDashboard.route) { inclusive = true }
+                                    }
+                                },
+                                onLogout = {
+                                    authViewModel.logout {
+                                        navController.navigate(Screen.Login.route) {
+                                            popUpTo(0) { inclusive = true }
+                                        }
+                                    }
                                 },
                                 onAddMonitor = {
                                     navController.navigate("protected_add_monitor")
@@ -401,9 +533,32 @@ class MainActivity : ComponentActivity() {
                         composable("protected_my_rules") {
                             currentProtectedRoute = ProtectedScreen.MyRules.route
                             MyRulesScreen(
+                                currentUser = authViewModel.currentUser,
                                 currentUserId = authViewModel.currentUser?.uid,
+                                currentRoute = currentProtectedRoute,
                                 rulesRepository = app.rulesRepository,
-                                onNavigateBack = { navController.popBackStack() },
+                                onNavigate = { route ->
+                                    currentProtectedRoute = route
+                                    when (route) {
+                                        ProtectedScreen.Dashboard.route -> navController.navigate(Screen.ProtectedDashboard.route) { popUpTo(Screen.ProtectedDashboard.route) { inclusive = true } }
+                                        ProtectedScreen.Profile.route -> navController.navigate("protected_profile") { popUpTo("protected_my_rules") { inclusive = true } }
+                                        ProtectedScreen.MyMonitors.route -> navController.navigate("protected_my_monitors") { popUpTo("protected_my_rules") { inclusive = true } }
+                                        ProtectedScreen.MyRules.route -> { /* Already here */ }
+                                        else -> navController.navigate("protected_placeholder/$route")
+                                    }
+                                },
+                                onSwitchProfile = {
+                                    navController.navigate(Screen.ProfileSelection.route) {
+                                        popUpTo(Screen.ProtectedDashboard.route) { inclusive = true }
+                                    }
+                                },
+                                onLogout = {
+                                    authViewModel.logout {
+                                        navController.navigate(Screen.Login.route) {
+                                            popUpTo(0) { inclusive = true }
+                                        }
+                                    }
+                                },
                                 onEditRule = { assignmentId ->
                                     navController.navigate("protected_rule_settings/$assignmentId")
                                 }

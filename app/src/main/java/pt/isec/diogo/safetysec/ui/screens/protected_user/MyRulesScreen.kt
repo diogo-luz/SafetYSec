@@ -14,19 +14,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Rule
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,20 +39,25 @@ import pt.isec.diogo.safetysec.R
 import pt.isec.diogo.safetysec.data.model.Rule
 import pt.isec.diogo.safetysec.data.model.RuleAssignment
 import pt.isec.diogo.safetysec.data.model.RuleType
+import pt.isec.diogo.safetysec.data.model.User
 import pt.isec.diogo.safetysec.data.repository.RulesRepository
+import pt.isec.diogo.safetysec.ui.components.DrawerScaffold
 import pt.isec.diogo.safetysec.ui.screens.monitor.getRuleTypeDisplayName
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyRulesScreen(
+    currentUser: User?,
     currentUserId: String?,
+    currentRoute: String,
     rulesRepository: RulesRepository,
-    onNavigateBack: () -> Unit,
+    onNavigate: (String) -> Unit,
+    onSwitchProfile: () -> Unit,
+    onLogout: () -> Unit,
     onEditRule: (String) -> Unit
 ) {
+    val scope = rememberCoroutineScope()
     var rulesWithAssignments by remember { mutableStateOf<List<Pair<Rule, RuleAssignment>>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
-    val scope = rememberCoroutineScope()
 
     fun loadRules() {
         currentUserId?.let { uid ->
@@ -78,12 +78,14 @@ fun MyRulesScreen(
         loadRules()
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.menu_my_rules)) }
-            )
-        }
+    DrawerScaffold(
+        currentUser = currentUser,
+        currentRoute = currentRoute,
+        title = stringResource(R.string.menu_my_rules),
+        menuItems = getProtectedMenuItems(),
+        onNavigate = onNavigate,
+        onSwitchProfile = onSwitchProfile,
+        onLogout = onLogout
     ) { innerPadding ->
         if (rulesWithAssignments.isEmpty() && !isLoading) {
             Box(
@@ -155,7 +157,7 @@ fun MyRulesScreen(
                             text = stringResource(R.string.section_safe_zones),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(vertical = 8.dp, horizontal = 0.dp).padding(top = 16.dp)
+                            modifier = Modifier.padding(vertical = 8.dp).padding(top = 16.dp)
                         )
                     }
                     items(safeZones) { (rule, assignment) ->

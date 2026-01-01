@@ -14,9 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
@@ -24,15 +22,12 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,21 +44,26 @@ import kotlinx.coroutines.launch
 import pt.isec.diogo.safetysec.R
 import pt.isec.diogo.safetysec.data.model.Rule
 import pt.isec.diogo.safetysec.data.model.RuleType
+import pt.isec.diogo.safetysec.data.model.User
 import pt.isec.diogo.safetysec.data.repository.RulesRepository
+import pt.isec.diogo.safetysec.ui.components.DrawerScaffold
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SafeZonesScreen(
+    currentUser: User?,
     currentUserId: String?,
+    currentRoute: String,
     rulesRepository: RulesRepository,
-    onNavigateBack: () -> Unit,
+    onNavigate: (String) -> Unit,
+    onSwitchProfile: () -> Unit,
+    onLogout: () -> Unit,
     onCreateZone: () -> Unit,
     onEditZone: (String) -> Unit
 ) {
+    val scope = rememberCoroutineScope()
     var zones by remember { mutableStateOf<List<Rule>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var zoneToDelete by remember { mutableStateOf<Rule?>(null) }
-    val scope = rememberCoroutineScope()
 
     fun loadZones() {
         currentUserId?.let { uid ->
@@ -111,12 +111,14 @@ fun SafeZonesScreen(
         )
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.menu_safe_zones)) }
-            )
-        },
+    DrawerScaffold(
+        currentUser = currentUser,
+        currentRoute = currentRoute,
+        title = stringResource(R.string.menu_safe_zones),
+        menuItems = getMonitorMenuItems(),
+        onNavigate = onNavigate,
+        onSwitchProfile = onSwitchProfile,
+        onLogout = onLogout,
         floatingActionButton = {
             FloatingActionButton(onClick = onCreateZone) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.create_safe_zone))
@@ -192,7 +194,7 @@ private fun SafeZoneCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Location icon
+            // Icon
             Icon(
                 imageVector = Icons.Default.LocationOn,
                 contentDescription = null,

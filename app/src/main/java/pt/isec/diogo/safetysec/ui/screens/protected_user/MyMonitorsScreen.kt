@@ -15,21 +15,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,13 +38,17 @@ import androidx.compose.ui.unit.dp
 import pt.isec.diogo.safetysec.R
 import pt.isec.diogo.safetysec.data.model.User
 import pt.isec.diogo.safetysec.data.repository.AssociationRepository
+import pt.isec.diogo.safetysec.ui.components.DrawerScaffold
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyMonitorsScreen(
+    currentUser: User?,
     currentUserId: String?,
+    currentRoute: String,
     associationRepository: AssociationRepository,
-    onNavigateBack: () -> Unit,
+    onNavigate: (String) -> Unit,
+    onSwitchProfile: () -> Unit,
+    onLogout: () -> Unit,
     onAddMonitor: () -> Unit
 ) {
     var monitors by remember { mutableStateOf<List<User>>(emptyList()) }
@@ -69,12 +67,14 @@ fun MyMonitorsScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.menu_my_monitors)) }
-            )
-        },
+    DrawerScaffold(
+        currentUser = currentUser,
+        currentRoute = currentRoute,
+        title = stringResource(R.string.menu_my_monitors),
+        menuItems = getProtectedMenuItems(),
+        onNavigate = onNavigate,
+        onSwitchProfile = onSwitchProfile,
+        onLogout = onLogout,
         floatingActionButton = {
             FloatingActionButton(onClick = onAddMonitor) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_monitor))
