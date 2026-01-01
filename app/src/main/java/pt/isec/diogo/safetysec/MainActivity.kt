@@ -169,6 +169,9 @@ class MainActivity : ComponentActivity() {
                                         MonitorScreen.SafeZones.route -> {
                                             navController.navigate("monitor_safe_zones")
                                         }
+                                        MonitorScreen.Alerts.route -> {
+                                            navController.navigate(MonitorScreen.Alerts.route)
+                                        }
                                         else -> {
                                             navController.navigate("monitor_placeholder/$route")
                                         }
@@ -203,6 +206,7 @@ class MainActivity : ComponentActivity() {
                                         MonitorScreen.MyProtected.route -> navController.navigate("monitor_my_protected") { popUpTo("monitor_profile") { inclusive = true } }
                                         MonitorScreen.Rules.route -> navController.navigate("monitor_rules") { popUpTo("monitor_profile") { inclusive = true } }
                                         MonitorScreen.SafeZones.route -> navController.navigate("monitor_safe_zones") { popUpTo("monitor_profile") { inclusive = true } }
+                                        MonitorScreen.Alerts.route -> navController.navigate(MonitorScreen.Alerts.route) { popUpTo("monitor_profile") { inclusive = true } }
                                         else -> navController.navigate("monitor_placeholder/$route")
                                     }
                                 },
@@ -245,6 +249,7 @@ class MainActivity : ComponentActivity() {
                                         MonitorScreen.MyProtected.route -> { /* Already here */ }
                                         MonitorScreen.Rules.route -> navController.navigate("monitor_rules") { popUpTo("monitor_my_protected") { inclusive = true } }
                                         MonitorScreen.SafeZones.route -> navController.navigate("monitor_safe_zones") { popUpTo("monitor_my_protected") { inclusive = true } }
+                                        MonitorScreen.Alerts.route -> navController.navigate(MonitorScreen.Alerts.route) { popUpTo("monitor_my_protected") { inclusive = true } }
                                         else -> navController.navigate("monitor_placeholder/$route")
                                     }
                                 },
@@ -296,6 +301,7 @@ class MainActivity : ComponentActivity() {
                                         MonitorScreen.MyProtected.route -> navController.navigate("monitor_my_protected") { popUpTo("monitor_rules") { inclusive = true } }
                                         MonitorScreen.Rules.route -> { /* Already here */ }
                                         MonitorScreen.SafeZones.route -> navController.navigate("monitor_safe_zones") { popUpTo("monitor_rules") { inclusive = true } }
+                                        MonitorScreen.Alerts.route -> navController.navigate(MonitorScreen.Alerts.route) { popUpTo("monitor_rules") { inclusive = true } }
                                         else -> navController.navigate("monitor_placeholder/$route")
                                     }
                                 },
@@ -354,6 +360,7 @@ class MainActivity : ComponentActivity() {
                                         MonitorScreen.MyProtected.route -> navController.navigate("monitor_my_protected") { popUpTo("monitor_safe_zones") { inclusive = true } }
                                         MonitorScreen.Rules.route -> navController.navigate("monitor_rules") { popUpTo("monitor_safe_zones") { inclusive = true } }
                                         MonitorScreen.SafeZones.route -> { /* Already here */ }
+                                        MonitorScreen.Alerts.route -> navController.navigate(MonitorScreen.Alerts.route) { popUpTo("monitor_safe_zones") { inclusive = true } }
                                         else -> navController.navigate("monitor_placeholder/$route")
                                     }
                                 },
@@ -424,6 +431,9 @@ class MainActivity : ComponentActivity() {
                                         ProtectedScreen.MyRules.route -> {
                                             navController.navigate("protected_my_rules")
                                         }
+                                        ProtectedScreen.AlertsSafety.route -> {
+                                            navController.navigate(ProtectedScreen.AlertsSafety.route)
+                                        }
                                         else -> {
                                             navController.navigate("protected_placeholder/$route")
                                         }
@@ -460,6 +470,7 @@ class MainActivity : ComponentActivity() {
                                         ProtectedScreen.Profile.route -> { /* Already here */ }
                                         ProtectedScreen.MyMonitors.route -> navController.navigate("protected_my_monitors") { popUpTo("protected_profile") { inclusive = true } }
                                         ProtectedScreen.MyRules.route -> navController.navigate("protected_my_rules") { popUpTo("protected_profile") { inclusive = true } }
+                                        ProtectedScreen.AlertsSafety.route -> navController.navigate(ProtectedScreen.AlertsSafety.route) { popUpTo("protected_profile") { inclusive = true } }
                                         else -> navController.navigate("protected_placeholder/$route")
                                     }
                                 },
@@ -501,6 +512,7 @@ class MainActivity : ComponentActivity() {
                                         ProtectedScreen.Profile.route -> navController.navigate("protected_profile") { popUpTo("protected_my_monitors") { inclusive = true } }
                                         ProtectedScreen.MyMonitors.route -> { /* Already here */ }
                                         ProtectedScreen.MyRules.route -> navController.navigate("protected_my_rules") { popUpTo("protected_my_monitors") { inclusive = true } }
+                                        ProtectedScreen.AlertsSafety.route -> navController.navigate(ProtectedScreen.AlertsSafety.route) { popUpTo("protected_my_monitors") { inclusive = true } }
                                         else -> navController.navigate("protected_placeholder/$route")
                                     }
                                 },
@@ -548,6 +560,7 @@ class MainActivity : ComponentActivity() {
                                         ProtectedScreen.Profile.route -> navController.navigate("protected_profile") { popUpTo("protected_my_rules") { inclusive = true } }
                                         ProtectedScreen.MyMonitors.route -> navController.navigate("protected_my_monitors") { popUpTo("protected_my_rules") { inclusive = true } }
                                         ProtectedScreen.MyRules.route -> { /* Already here */ }
+                                        ProtectedScreen.AlertsSafety.route -> navController.navigate(ProtectedScreen.AlertsSafety.route) { popUpTo("protected_my_rules") { inclusive = true } }
                                         else -> navController.navigate("protected_placeholder/$route")
                                     }
                                 },
