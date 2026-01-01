@@ -8,12 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,12 +34,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import pt.isec.diogo.safetysec.R
 import pt.isec.diogo.safetysec.data.model.Rule
 import pt.isec.diogo.safetysec.data.model.RuleAssignment
-import pt.isec.diogo.safetysec.data.model.RuleType
 import pt.isec.diogo.safetysec.data.repository.RulesRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,11 +54,25 @@ fun RuleTimeSettingsScreen(
     var startTime by remember { mutableStateOf("") }
     var endTime by remember { mutableStateOf("") }
     var isAccepted by remember { mutableStateOf(false) }
+    var isScheduled by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
+    var isSaving by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(assignmentId) {
-        isLoading = false
+        rulesRepository.getAssignmentById(assignmentId)
+            .onSuccess { (fetchedRule, fetchedAssignment) ->
+                rule = fetchedRule
+                assignment = fetchedAssignment
+                startTime = fetchedAssignment.startTime ?: ""
+                endTime = fetchedAssignment.endTime ?: ""
+                isAccepted = fetchedAssignment.isAccepted
+                isScheduled = fetchedAssignment.startTime != null && fetchedAssignment.endTime != null
+                isLoading = false
+            }
+            .onFailure {
+                isLoading = false
+            }
     }
 
     Scaffold(
@@ -80,44 +95,17 @@ fun RuleTimeSettingsScreen(
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = stringResource(R.string.schedule_title),
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Text(
-                text = stringResource(R.string.schedule_subtitle),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                OutlinedTextField(
-                    value = startTime,
-                    onValueChange = { startTime = it },
-                    label = { Text(stringResource(R.string.start_time)) },
-                    placeholder = { Text("09:00") },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f)
-                )
-
-                OutlinedTextField(
-                    value = endTime,
-                    onValueChange = { endTime = it },
-                    label = { Text(stringResource(R.string.end_time)) },
-                    placeholder = { Text("17:00") },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f)
+            // Rule info
+            rule?.let { r ->
+                Text(
+                    text = r.name,
+                    style = MaterialTheme.typography.headlineSmall
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
+            // Accept toggle
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -133,12 +121,107 @@ fun RuleTimeSettingsScreen(
                 )
             }
 
+            Text(
+                text = stringResource(R.string.accept_rule_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Schedule checkbox
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = isScheduled,
+                    onCheckedChange = { checked ->
+                        isScheduled = checked
+                        if (!checked) {
+                            startTime = ""
+                            endTime = ""
+                        }
+                    }
+                )
+                Text(
+                    text = stringResource(R.string.enable_schedule),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+
+            Text(
+                text = stringResource(R.string.schedule_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            // Time fields (only if scheduled)
+            if (isScheduled) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    OutlinedTextField(
+                        value = startTime,
+                        onValueChange = { value ->
+                            if (value.length <= 5 && value.all { it.isDigit() || it == ':' }) {
+                                startTime = value
+                                // Auto-suggest end time (+8 hours)
+                                if (value.length == 5 && endTime.isEmpty()) {
+                                    val parts = value.split(":")
+                                    if (parts.size == 2) {
+                                        val hour = (parts[0].toIntOrNull() ?: 0)
+                                        val endHour = (hour + 8) % 24
+                                        endTime = "%02d:%s".format(endHour, parts[1])
+                                    }
+                                }
+                            }
+                        },
+                        label = { Text(stringResource(R.string.start_time)) },
+                        placeholder = { Text("09:00") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    OutlinedTextField(
+                        value = endTime,
+                        onValueChange = { value ->
+                            if (value.length <= 5 && value.all { it.isDigit() || it == ':' }) {
+                                endTime = value
+                            }
+                        },
+                        label = { Text(stringResource(R.string.end_time)) },
+                        placeholder = { Text("17:00") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
                 onClick = {
-                    onNavigateBack()
+                    assignment?.let { a ->
+                        scope.launch {
+                            isSaving = true
+                            val updated = a.copy(
+                                isAccepted = isAccepted,
+                                startTime = if (isScheduled && startTime.isNotEmpty()) startTime else null,
+                                endTime = if (isScheduled && endTime.isNotEmpty()) endTime else null
+                            )
+                            rulesRepository.updateAssignment(updated)
+                            isSaving = false
+                            onNavigateBack()
+                        }
+                    }
                 },
+                enabled = !isLoading && !isSaving,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(stringResource(R.string.save))

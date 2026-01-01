@@ -101,4 +101,11 @@
     <string name="start_time">Hora de Início</string>
     <string name="end_time">Hora de Fim</string>
     <string name="accept_rule">Aceitar Regra</string>
+    <string name="accept_rule_hint">Quando aceite, esta regra irá monitorizá-lo</string>
+    <string name="enable_schedule">Ativar Horário</string>
+    <string name="schedule_hint">Se desativado, a regra monitoriza 24/7. Se ativado, apenas durante as horas definidas.</string>
+    <string name="delete">Eliminar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="delete_rule_title">Eliminar Regra</string>
+    <string name="delete_rule_confirm">Tem a certeza que deseja eliminar "%1$s"? Isto irá remover todas as atribuições.</string>
 </resources>

@@ -149,6 +149,24 @@ class RulesRepository {
         }
     }
 
+    suspend fun getAssignmentById(assignmentId: String): Result<Pair<Rule, RuleAssignment>> {
+        return try {
+            val doc = assignmentsCollection.document(assignmentId).get().await()
+            if (!doc.exists()) {
+                return Result.failure(Exception("Assignment not found"))
+            }
+            val assignment = RuleAssignment.fromMap(doc.id, doc.data ?: emptyMap())
+            val ruleDoc = rulesCollection.document(assignment.ruleId).get().await()
+            if (!ruleDoc.exists()) {
+                return Result.failure(Exception("Rule not found"))
+            }
+            val rule = Rule.fromMap(ruleDoc.id, ruleDoc.data ?: emptyMap())
+            Result.success(Pair(rule, assignment))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun removeAssignment(ruleId: String, protectedId: String): Result<Unit> {
         return try {
             val assignments = assignmentsCollection

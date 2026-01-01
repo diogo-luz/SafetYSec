@@ -101,4 +101,11 @@
     <string name="start_time">Start Time</string>
     <string name="end_time">End Time</string>
     <string name="accept_rule">Accept Rule</string>
+    <string name="accept_rule_hint">When accepted, this rule will monitor you</string>
+    <string name="enable_schedule">Enable Schedule</string>
+    <string name="schedule_hint">If disabled, the rule monitors 24/7. If enabled, only during the set hours.</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_rule_title">Delete Rule</string>
+    <string name="delete_rule_confirm">Are you sure you want to delete "%1$s"? This will remove all assignments.</string>
 </resources>

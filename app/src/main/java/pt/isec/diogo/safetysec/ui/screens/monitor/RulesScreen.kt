@@ -16,7 +16,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Rule
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,6 +60,7 @@ fun RulesScreen(
 ) {
     var rules by remember { mutableStateOf<List<Rule>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
+    var ruleToDelete by remember { mutableStateOf<Rule?>(null) }
     val scope = rememberCoroutineScope()
 
     fun loadRules() {
@@ -76,6 +80,33 @@ fun RulesScreen(
 
     LaunchedEffect(currentUserId) {
         loadRules()
+    }
+
+    // Delete confirmation dialog
+    ruleToDelete?.let { rule ->
+        AlertDialog(
+            onDismissRequest = { ruleToDelete = null },
+            title = { Text(stringResource(R.string.delete_rule_title)) },
+            text = { Text(stringResource(R.string.delete_rule_confirm, rule.name)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            rulesRepository.deleteRule(rule.id)
+                            ruleToDelete = null
+                            loadRules()
+                        }
+                    }
+                ) {
+                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { ruleToDelete = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -142,7 +173,8 @@ fun RulesScreen(
                                 loadRules()
                             }
                         },
-                        onAssign = { onAssignRule(rule.id) }
+                        onAssign = { onAssignRule(rule.id) },
+                        onDelete = { ruleToDelete = rule }
                     )
                 }
                 item { Spacer(modifier = Modifier.height(80.dp)) }
@@ -156,7 +188,8 @@ fun RulesScreen(
 private fun RuleCard(
     rule: Rule,
     onToggle: (Boolean) -> Unit,
-    onAssign: () -> Unit
+    onAssign: () -> Unit,
+    onDelete: () -> Unit
 ) {
     Card(
         onClick = onAssign,
@@ -193,7 +226,13 @@ private fun RuleCard(
                 }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            IconButton(onClick = onDelete) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = stringResource(R.string.delete),
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
 
             Switch(
                 checked = rule.isActive,
@@ -217,3 +256,4 @@ private fun getThresholdLabel(type: RuleType, threshold: Double): String = when 
     RuleType.GEOFENCE -> "${threshold.toInt()} m radius"
     else -> ""
 }
+

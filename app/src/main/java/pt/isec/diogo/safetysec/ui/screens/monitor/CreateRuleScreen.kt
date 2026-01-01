@@ -127,7 +127,11 @@ fun CreateRuleScreen(
                             onClick = {
                                 selectedType = type
                                 expanded = false
-                                if (!needsThreshold) threshold = ""
+                                
+                                name = getRuleTypeDisplayName(type)
+                                if (type != RuleType.SPEED_LIMIT && type != RuleType.INACTIVITY) {
+                                    threshold = ""
+                                }
                             }
                         )
                     }
