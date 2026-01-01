@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.LocationOff
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -39,6 +41,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -48,11 +51,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import pt.isec.diogo.safetysec.R
+import pt.isec.diogo.safetysec.data.model.AlertTriggerType
 import pt.isec.diogo.safetysec.data.model.User
 
 @Composable
 fun SOSCountdownScreen(
     currentUser: User?,
+    triggerType: AlertTriggerType = AlertTriggerType.MANUAL_SOS,
     onAlertTriggered: () -> Unit,
     onCancelled: () -> Unit
 ) {
@@ -63,6 +68,9 @@ fun SOSCountdownScreen(
     var showCancelDialog by remember { mutableStateOf(false) }
     var pinInput by remember { mutableStateOf("") }
     var pinError by remember { mutableStateOf(false) }
+    
+    // Mensagens e ícone baseados no trigger type
+    val (title, subtitle, icon) = getTriggerTypeContent(triggerType)
 
     // Countdown timer
     LaunchedEffect(remainingSeconds) {
@@ -92,7 +100,7 @@ fun SOSCountdownScreen(
         ) {
             // Icone
             Icon(
-                imageVector = Icons.Default.Warning,
+                imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(64.dp),
                 tint = MaterialTheme.colorScheme.error
@@ -102,7 +110,7 @@ fun SOSCountdownScreen(
 
             // Title
             Text(
-                text = stringResource(R.string.sos_countdown_title),
+                text = title,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
@@ -112,7 +120,7 @@ fun SOSCountdownScreen(
 
             // Subtitle
             Text(
-                text = stringResource(R.string.sos_countdown_subtitle),
+                text = subtitle,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -259,6 +267,42 @@ private fun CircularProgressIndicator(
             topLeft = topLeft,
             size = Size(diameter, diameter),
             style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+        )
+    }
+}
+
+@Composable
+private fun getTriggerTypeContent(triggerType: AlertTriggerType): Triple<String, String, ImageVector> {
+    return when (triggerType) {
+        AlertTriggerType.MANUAL_SOS -> Triple(
+            stringResource(R.string.sos_countdown_title),
+            stringResource(R.string.sos_countdown_subtitle),
+            Icons.Default.Warning
+        )
+        AlertTriggerType.GEOFENCE_VIOLATION -> Triple(
+            stringResource(R.string.geofence_alert_title),
+            stringResource(R.string.geofence_alert_subtitle),
+            Icons.Default.LocationOff
+        )
+        AlertTriggerType.SPEED_LIMIT -> Triple(
+            stringResource(R.string.speed_alert_title),
+            stringResource(R.string.speed_alert_subtitle),
+            Icons.Default.DirectionsCar
+        )
+        AlertTriggerType.FALL_DETECTION -> Triple(
+            stringResource(R.string.fall_alert_title),
+            stringResource(R.string.fall_alert_subtitle),
+            Icons.Default.Warning
+        )
+        AlertTriggerType.ACCIDENT_DETECTION -> Triple(
+            stringResource(R.string.accident_alert_title),
+            stringResource(R.string.accident_alert_subtitle),
+            Icons.Default.Warning
+        )
+        AlertTriggerType.INACTIVITY -> Triple(
+            stringResource(R.string.inactivity_alert_title),
+            stringResource(R.string.inactivity_alert_subtitle),
+            Icons.Default.Warning
         )
     }
 }

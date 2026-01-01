@@ -183,4 +183,21 @@
     <string name="recording">REC</string>
     <string name="uploading_video">Uploading video…</string>
     <string name="video_uploaded">Video uploaded</string>
+
+    <!-- Alert Type Messages -->
+    <string name="geofence_alert_title">Left Safe Zone!</string>
+    <string name="geofence_alert_subtitle">You have left your designated safe zone. Enter your PIN to cancel this alert.</string>
+    <string name="speed_alert_title">Speed Limit Exceeded!</string>
+    <string name="speed_alert_subtitle">You are traveling above the speed limit. Enter your PIN to cancel this alert.</string>
+    <string name="fall_alert_title">Fall Detected!</string>
+    <string name="fall_alert_subtitle">A fall was detected. Enter your PIN if you are okay.</string>
+    <string name="accident_alert_title">Accident Detected!</string>
+    <string name="accident_alert_subtitle">A possible accident was detected. Enter your PIN if you are okay.</string>
+    <string name="inactivity_alert_title">Inactivity Alert!</string>
+    <string name="inactivity_alert_subtitle">No activity detected. Enter your PIN to cancel this alert.</string>
+
+    <!-- Monitoring Service -->
+    <string name="location_monitoring">Location Monitoring</string>
+    <string name="monitoring_active">Active - Monitoring your safety</string>
+    <string name="monitoring_inactive">Inactive - Tap to enable</string>
 </resources>

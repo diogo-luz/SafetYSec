@@ -1,6 +1,8 @@
 package pt.isec.diogo.safetysec
 
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,9 +24,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import pt.isec.diogo.safetysec.services.BackgroundLocationService
 import pt.isec.diogo.safetysec.ui.navigation.MonitorScreen
 import pt.isec.diogo.safetysec.ui.navigation.ProtectedScreen
 import pt.isec.diogo.safetysec.ui.navigation.Screen
@@ -78,6 +82,13 @@ class MainActivity : ComponentActivity() {
             app.locationHandler.startLocationUpdates()
         }
     }
+    
+    // Pedir permissão de notificações (Android 13+)
+    private val askNotificationPermission = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        // Notificações ativadas ou não - a app continua a funcionar
+    }
 
     private fun verifyAndAskLocationPermissions() {
         if (checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -95,6 +106,34 @@ class MainActivity : ComponentActivity() {
             app.locationHandler.startLocationUpdates()
         }
     }
+    
+    private fun verifyAndAskNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                askNotificationPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
+    private fun startLocationService() {
+        val intent = Intent(this, BackgroundLocationService::class.java).apply {
+            action = BackgroundLocationService.ACTION_START
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
+        }
+    }
+
+    private fun stopLocationService() {
+        val intent = Intent(this, BackgroundLocationService::class.java).apply {
+            action = BackgroundLocationService.ACTION_STOP
+        }
+        stopService(intent)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,6 +141,19 @@ class MainActivity : ComponentActivity() {
         
         // Pedir permissões de localização
         verifyAndAskLocationPermissions()
+        
+        // Pedir permissão de notificações (Android 13+)
+        verifyAndAskNotificationPermission()
+        
+        // Verificar se foi aberto via notificação de alerta
+        val triggerTypeFromIntent = if (intent?.action == "TRIGGER_SOS_COUNTDOWN") {
+            intent.getStringExtra(BackgroundLocationService.EXTRA_TRIGGER_TYPE)
+        } else null
+        
+        // Verificar se foi aberto para gravação de vídeo
+        val alertIdFromIntent = if (intent?.action == "OPEN_RECORDING") {
+            intent.getStringExtra("ALERT_ID")
+        } else null
 
         setContent {
             SafetYSecTheme {
@@ -110,13 +162,28 @@ class MainActivity : ComponentActivity() {
                 // Determina o perfil atual para o drawer selection
                 var currentMonitorRoute by remember { mutableStateOf(MonitorScreen.Dashboard.route) }
                 var currentProtectedRoute by remember { mutableStateOf(ProtectedScreen.Dashboard.route) }
+                
+                // Estado do serviço de monitorização
+                var isMonitoringActive by remember { mutableStateOf(BackgroundLocationService.isServiceRunning) }
+                
+                // Trigger type para alertas automáticos
+                var pendingTriggerType by remember { mutableStateOf(triggerTypeFromIntent) }
+                
+                // Alert ID para gravação de vídeo
+                var pendingAlertId by remember { mutableStateOf(alertIdFromIntent) }
 
                 // Para operações assíncronas (save profile etc etc)
                 val scope = rememberCoroutineScope()
 
                 // Determina o destino inicial com base no estado de autenticação
                 val startDestination = if (authViewModel.isAuthenticated) {
-                    Screen.ProfileSelection.route
+                    when {
+                        // Se foi aberto para gravação, ir direto para recording
+                        pendingAlertId != null -> ProtectedScreen.Recording.createRoute(pendingAlertId!!)
+                        // Se foi aberto via alerta countdown
+                        pendingTriggerType != null -> ProtectedScreen.SOSCountdown.route
+                        else -> Screen.ProfileSelection.route
+                    }
                 } else {
                     Screen.Login.route
                 }
@@ -453,6 +520,7 @@ class MainActivity : ComponentActivity() {
                             ProtectedDashboardScreen(
                                 currentUser = authViewModel.currentUser,
                                 currentRoute = currentProtectedRoute,
+                                isMonitoringActive = isMonitoringActive,
                                 onNavigate = { route ->
                                     currentProtectedRoute = route
                                     when (route) {
@@ -488,6 +556,14 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onTriggerSOS = {
                                     navController.navigate(ProtectedScreen.SOSCountdown.route)
+                                },
+                                onToggleMonitoring = { enabled ->
+                                    isMonitoringActive = enabled
+                                    if (enabled) {
+                                        startLocationService()
+                                    } else {
+                                        stopLocationService()
+                                    }
                                 }
                             )
                         }
@@ -635,8 +711,26 @@ class MainActivity : ComponentActivity() {
 
                         // SOS Countdown (Protected)
                         composable(ProtectedScreen.SOSCountdown.route) {
+                            // Cancelar countdown do serviço - UI assume controlo
+                            if (BackgroundLocationService.isCountdownActive) {
+                                val cancelIntent = Intent(this@MainActivity, BackgroundLocationService::class.java).apply {
+                                    action = BackgroundLocationService.ACTION_CANCEL_COUNTDOWN
+                                }
+                                startService(cancelIntent)
+                            }
+                            
+                            // Determinar o trigger type
+                            val triggerType = pendingTriggerType?.let {
+                                try {
+                                    pt.isec.diogo.safetysec.data.model.AlertTriggerType.valueOf(it)
+                                } catch (e: Exception) {
+                                    pt.isec.diogo.safetysec.data.model.AlertTriggerType.MANUAL_SOS
+                                }
+                            } ?: pt.isec.diogo.safetysec.data.model.AlertTriggerType.MANUAL_SOS
+                            
                             SOSCountdownScreen(
                                 currentUser = authViewModel.currentUser,
+                                triggerType = triggerType,
                                 onAlertTriggered = {
                                     // Create alert with location and navigate to recording
                                     scope.launch {
@@ -645,7 +739,7 @@ class MainActivity : ComponentActivity() {
                                             val alert = pt.isec.diogo.safetysec.data.model.Alert(
                                                 protectedUserId = user.uid,
                                                 protectedUserName = user.displayName,
-                                                triggerType = pt.isec.diogo.safetysec.data.model.AlertTriggerType.MANUAL_SOS,
+                                                triggerType = triggerType,
                                                 status = pt.isec.diogo.safetysec.data.model.AlertStatus.ACTIVE,
                                                 latitude = location?.latitude,
                                                 longitude = location?.longitude
@@ -664,9 +758,14 @@ class MainActivity : ComponentActivity() {
                                             }
                                         }
                                     }
+                                    // Limpar pending trigger type
+                                    pendingTriggerType = null
                                 },
                                 onCancelled = {
-                                    navController.popBackStack()
+                                    pendingTriggerType = null
+                                    navController.navigate(Screen.ProtectedDashboard.route) {
+                                        popUpTo(ProtectedScreen.SOSCountdown.route) { inclusive = true }
+                                    }
                                 }
                             )
                         }

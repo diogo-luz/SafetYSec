@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
@@ -27,6 +28,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
@@ -50,10 +53,12 @@ import pt.isec.diogo.safetysec.ui.components.AppDrawer
 fun ProtectedDashboardScreen(
     currentUser: User?,
     currentRoute: String,
+    isMonitoringActive: Boolean = false,
     onNavigate: (String) -> Unit,
     onSwitchProfile: () -> Unit,
     onLogout: () -> Unit,
-    onTriggerSOS: () -> Unit
+    onTriggerSOS: () -> Unit,
+    onToggleMonitoring: (Boolean) -> Unit = {}
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -193,6 +198,60 @@ fun ProtectedDashboardScreen(
                                 textAlign = TextAlign.Center
                             )
                         }
+                    }
+                }
+
+                // Monitoring toggle
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (isMonitoringActive) 
+                            MaterialTheme.colorScheme.primaryContainer 
+                        else 
+                            MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = null,
+                                tint = if (isMonitoringActive) 
+                                    MaterialTheme.colorScheme.primary 
+                                else 
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.location_monitoring),
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Text(
+                                    text = if (isMonitoringActive) 
+                                        stringResource(R.string.monitoring_active) 
+                                    else 
+                                        stringResource(R.string.monitoring_inactive),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        Switch(
+                            checked = isMonitoringActive,
+                            onCheckedChange = onToggleMonitoring,
+                            colors = SwitchDefaults.colors(
+                                checkedTrackColor = MaterialTheme.colorScheme.primary
+                            )
+                        )
                     }
                 }
 

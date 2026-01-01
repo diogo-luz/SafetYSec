@@ -183,4 +183,21 @@
     <string name="recording">REC</string>
     <string name="uploading_video">A enviar vídeo…</string>
     <string name="video_uploaded">Vídeo enviado</string>
+
+    <!-- Alert Type Messages -->
+    <string name="geofence_alert_title">Saiu da Zona Segura!</string>
+    <string name="geofence_alert_subtitle">Saiu da zona segura designada. Insira o PIN para cancelar este alerta.</string>
+    <string name="speed_alert_title">Limite de Velocidade Excedido!</string>
+    <string name="speed_alert_subtitle">Está a viajar acima do limite de velocidade. Insira o PIN para cancelar.</string>
+    <string name="fall_alert_title">Queda Detetada!</string>
+    <string name="fall_alert_subtitle">Foi detetada uma queda. Insira o PIN se estiver bem.</string>
+    <string name="accident_alert_title">Acidente Detetado!</string>
+    <string name="accident_alert_subtitle">Possível acidente detetado. Insira o PIN se estiver bem.</string>
+    <string name="inactivity_alert_title">Alerta de Inatividade!</string>
+    <string name="inactivity_alert_subtitle">Sem atividade detetada. Insira o PIN para cancelar este alerta.</string>
+
+    <!-- Monitoring Service -->
+    <string name="location_monitoring">Monitorização de Localização</string>
+    <string name="monitoring_active">Ativo - A monitorizar a sua segurança</string>
+    <string name="monitoring_inactive">Inativo - Toque para ativar</string>
 </resources>
