@@ -163,6 +163,18 @@ class AuthViewModel(
         onSuccess()
     }
 
+    /**
+     * Atualizar os dados do utilizador atual no Firestore
+     */
+    fun refreshUser() {
+        viewModelScope.launch {
+            authRepository.getCurrentUser()
+                .onSuccess { user ->
+                    currentUser = user
+                }
+        }
+    }
+
     private fun clearFormFields() {
         email = ""
         password = ""

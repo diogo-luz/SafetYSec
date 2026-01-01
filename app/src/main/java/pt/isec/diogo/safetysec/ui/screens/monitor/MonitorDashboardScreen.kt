@@ -1,14 +1,25 @@
 package pt.isec.diogo.safetysec.ui.screens.monitor
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
@@ -18,6 +29,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
@@ -26,19 +38,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.launch
 import pt.isec.diogo.safetysec.R
 import pt.isec.diogo.safetysec.data.model.User
 import pt.isec.diogo.safetysec.ui.components.AppDrawer
-import pt.isec.diogo.safetysec.ui.navigation.MonitorScreen
 
 /**
- * Dashboard do Monitor com mapa e protected users
+ * Dashboard do Monitor com protected users
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +59,9 @@ fun MonitorDashboardScreen(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    // TODO: Get from repository
+    val protectedUsers = emptyList<ProtectedUserItem>()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -92,53 +103,173 @@ fun MonitorDashboardScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                // Mapa com localizações dos protected users
-                Box(
+                // Header
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val cameraPositionState = rememberCameraPositionState {
-                        // Posição inicial - ISEC Coimbra
-                        position = CameraPosition.fromLatLngZoom(LatLng(40.1925, -8.4128), 12f)
-                    }
-
-                    GoogleMap(
-                        modifier = Modifier.fillMaxSize(),
-                        cameraPositionState = cameraPositionState
-                    ) {
-                        // TODO: Adicionar markers dos protected users
-                    }
+                    Text(
+                        text = stringResource(R.string.protected_users_count, protectedUsers.size),
+                        style = MaterialTheme.typography.titleMedium
+                    )
                 }
 
-                // Card numero de protected users
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                if (protectedUsers.isEmpty()) {
+                    // se nao tiver nenhum associado
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = stringResource(R.string.protected_users_count, 0),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = stringResource(R.string.no_active_alerts),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = null,
+                                modifier = Modifier.size(64.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                            )
+                            Text(
+                                text = stringResource(R.string.no_protected_users),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = stringResource(R.string.add_protected_hint),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
+                } else {
+                    // lista de protected users
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(protectedUsers) { protectedUser ->
+                            ProtectedUserCard(protectedUser = protectedUser)
+                        }
+                        item { Spacer(modifier = Modifier.height(16.dp)) }
                     }
                 }
             }
+        }
+    }
+}
+
+data class ProtectedUserItem(
+    val uid: String,
+    val displayName: String,
+    val lastLocation: String?,
+    val lastUpdateTime: String?,
+    val isOnline: Boolean,
+    val hasActiveAlert: Boolean
+)
+
+/**
+ * Card protected user
+ */
+@Composable
+private fun ProtectedUserCard(
+    protectedUser: ProtectedUserItem
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = if (protectedUser.hasActiveAlert) {
+                MaterialTheme.colorScheme.errorContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            }
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Avatar
+            Surface(
+                modifier = Modifier.size(48.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.padding(12.dp),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Info
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = protectedUser.displayName,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                if (protectedUser.lastLocation != null) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = protectedUser.lastLocation,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+
+                if (protectedUser.lastUpdateTime != null) {
+                    Text(
+                        text = protectedUser.lastUpdateTime,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                }
+            }
+
+            // Status icon
+            Icon(
+                imageVector = if (protectedUser.hasActiveAlert) {
+                    Icons.Default.Warning
+                } else {
+                    Icons.Default.CheckCircle
+                },
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = if (protectedUser.hasActiveAlert) {
+                    MaterialTheme.colorScheme.error
+                } else if (protectedUser.isOnline) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                }
+            )
         }
     }
 }

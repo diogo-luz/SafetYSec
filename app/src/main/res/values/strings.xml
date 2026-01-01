@@ -41,6 +41,8 @@
     <string name="monitor_dashboard_title">Monitor Dashboard</string>
     <string name="protected_users_count">%d Protected Users</string>
     <string name="no_active_alerts">No active alerts</string>
+    <string name="no_protected_users">No protected users yet</string>
+    <string name="add_protected_hint">Go to My Protected Users to add someone</string>
 
     <!-- Protected Dashboard -->
     <string name="protected_dashboard_title">My Safety</string>

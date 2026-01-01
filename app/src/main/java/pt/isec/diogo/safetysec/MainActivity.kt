@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +36,7 @@ import pt.isec.diogo.safetysec.ui.screens.protected_user.ProtectedProfileScreen
 import pt.isec.diogo.safetysec.ui.theme.SafetYSecTheme
 import pt.isec.diogo.safetysec.ui.viewmodels.AuthViewModel
 import pt.isec.diogo.safetysec.ui.viewmodels.AuthViewModelFactory
+import kotlinx.coroutines.launch
 
 /**
  * Main activity da aplicação. -> manifest.xml
@@ -59,6 +61,9 @@ class MainActivity : ComponentActivity() {
                 var currentMonitorRoute by remember { mutableStateOf(MonitorScreen.Dashboard.route) }
                 var currentProtectedRoute by remember { mutableStateOf(ProtectedScreen.Dashboard.route) }
 
+                // Para operações assíncronas (save profile etc etc)
+                val scope = rememberCoroutineScope()
+
                 // Determina o destino inicial com base no estado de autenticação
                 val startDestination = if (authViewModel.isAuthenticated) {
                     Screen.ProfileSelection.route
@@ -66,12 +71,11 @@ class MainActivity : ComponentActivity() {
                     Screen.Login.route
                 }
 
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    NavHost(
-                        navController = navController,
-                        startDestination = startDestination,
-                        modifier = Modifier.padding(innerPadding)
-                    ) {
+                NavHost(
+                    navController = navController,
+                    startDestination = startDestination,
+                    modifier = Modifier.fillMaxSize()
+                ) {
                         // Login Screen
                         composable(Screen.Login.route) {
                             LoginScreen(
@@ -171,7 +175,12 @@ class MainActivity : ComponentActivity() {
                                     navController.popBackStack()
                                 },
                                 onSaveProfile = { displayName ->
-                                    // TODO: Save profile via UserRepository
+                                    authViewModel.currentUser?.uid?.let { uid ->
+                                        scope.launch {
+                                            app.userRepository.updateProfile(uid, displayName)
+                                            authViewModel.refreshUser()
+                                        }
+                                    }
                                 }
                             )
                         }
@@ -227,7 +236,12 @@ class MainActivity : ComponentActivity() {
                                     navController.popBackStack()
                                 },
                                 onSaveProfile = { displayName, pin, timer ->
-                                    // TODO: Save profile via UserRepository
+                                    authViewModel.currentUser?.uid?.let { uid ->
+                                        scope.launch {
+                                            app.userRepository.updateProtectedProfile(uid, displayName, pin, timer)
+                                            authViewModel.refreshUser()
+                                        }
+                                    }
                                 }
                             )
                         }
@@ -237,7 +251,6 @@ class MainActivity : ComponentActivity() {
                             val route = backStackEntry.arguments?.getString("route") ?: ""
                             PlaceholderScreen("Protected: $route\n(Coming Soon)")
                         }
-                    }
                 }
             }
         }

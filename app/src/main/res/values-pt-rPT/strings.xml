@@ -41,6 +41,8 @@
     <string name="monitor_dashboard_title">Dashboard Monitor</string>
     <string name="protected_users_count">%d Utilizadores Protegidos</string>
     <string name="no_active_alerts">Sem alertas ativos</string>
+    <string name="no_protected_users">Ainda sem utilizadores protegidos</string>
+    <string name="add_protected_hint">Vá a Os Meus Protegidos para adicionar alguém</string>
 
     <!-- Protected Dashboard -->
     <string name="protected_dashboard_title">A Minha Segurança</string>
