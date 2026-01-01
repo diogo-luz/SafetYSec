@@ -48,6 +48,7 @@ import pt.isec.diogo.safetysec.ui.screens.protected_user.ProtectedProfileScreen
 import pt.isec.diogo.safetysec.ui.screens.protected_user.RuleTimeSettingsScreen
 import pt.isec.diogo.safetysec.ui.screens.protected_user.SOSCountdownScreen
 import pt.isec.diogo.safetysec.ui.screens.protected_user.AlertsSafetyScreen
+import pt.isec.diogo.safetysec.ui.screens.protected_user.RecordingScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.AlertsScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.AlertDetailScreen
 import pt.isec.diogo.safetysec.ui.theme.SafetYSecTheme
@@ -637,7 +638,7 @@ class MainActivity : ComponentActivity() {
                             SOSCountdownScreen(
                                 currentUser = authViewModel.currentUser,
                                 onAlertTriggered = {
-                                    // Create alert with location and navigate back to dashboard
+                                    // Create alert with location and navigate to recording
                                     scope.launch {
                                         authViewModel.currentUser?.let { user ->
                                             val location = app.locationHandler.currentLocation
@@ -649,15 +650,49 @@ class MainActivity : ComponentActivity() {
                                                 latitude = location?.latitude,
                                                 longitude = location?.longitude
                                             )
-                                            app.alertsRepository.createAlert(alert)
+                                            val result = app.alertsRepository.createAlert(alert)
+                                            result.onSuccess { alertId ->
+                                                // Navigate to recording screen
+                                                navController.navigate(ProtectedScreen.Recording.createRoute(alertId)) {
+                                                    popUpTo(ProtectedScreen.SOSCountdown.route) { inclusive = true }
+                                                }
+                                            }.onFailure {
+                                                // Se falhar, volta ao dashboard
+                                                navController.navigate(Screen.ProtectedDashboard.route) {
+                                                    popUpTo(ProtectedScreen.SOSCountdown.route) { inclusive = true }
+                                                }
+                                            }
                                         }
-                                    }
-                                    navController.navigate(Screen.ProtectedDashboard.route) {
-                                        popUpTo(ProtectedScreen.SOSCountdown.route) { inclusive = true }
                                     }
                                 },
                                 onCancelled = {
                                     navController.popBackStack()
+                                }
+                            )
+                        }
+
+                        // Recording Screen (Protected)
+                        composable(ProtectedScreen.Recording.route) { backStackEntry ->
+                            val alertId = backStackEntry.arguments?.getString("alertId") ?: ""
+                            RecordingScreen(
+                                alertId = alertId,
+                                onRecordingComplete = { videoUrl ->
+                                    // Atualizar alert com videoUrl
+                                    if (videoUrl != null) {
+                                        scope.launch {
+                                            app.alertsRepository.updateAlertVideoUrl(alertId, videoUrl)
+                                        }
+                                    }
+                                    // Voltar ao dashboard
+                                    navController.navigate(Screen.ProtectedDashboard.route) {
+                                        popUpTo(ProtectedScreen.Recording.route) { inclusive = true }
+                                    }
+                                },
+                                onError = { _ ->
+                                    // Continua mesmo com erro
+                                    navController.navigate(Screen.ProtectedDashboard.route) {
+                                        popUpTo(ProtectedScreen.Recording.route) { inclusive = true }
+                                    }
                                 }
                             )
                         }

@@ -64,6 +64,10 @@ class AlertsRepository(
         mapToAlert(doc.data)
     }
 
+    suspend fun updateAlertVideoUrl(alertId: String, videoUrl: String): Result<Unit> = runCatching {
+        alertsCollection.document(alertId).update("videoUrl", videoUrl).await()
+    }
+
     private fun alertToMap(alert: Alert): Map<String, Any?> = mapOf(
         "id" to alert.id,
         "protectedUserId" to alert.protectedUserId,

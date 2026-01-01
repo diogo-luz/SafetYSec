@@ -177,4 +177,10 @@
     <string name="status_resolved">Resolved</string>
     <string name="status_cancelled">Cancelled</string>
     <string name="unknown_user">Unknown User</string>
+
+    <!-- Video Recording -->
+    <string name="requesting_permissions">Requesting permissions…</string>
+    <string name="recording">REC</string>
+    <string name="uploading_video">Uploading video…</string>
+    <string name="video_uploaded">Video uploaded</string>
 </resources>
