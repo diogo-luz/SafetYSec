@@ -1,6 +1,7 @@
 package pt.isec.diogo.safetysec.ui.screens.monitor
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Rule
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.People
@@ -26,7 +27,7 @@ fun getMonitorMenuItems(): List<DrawerMenuItem> = listOf(
         route = MonitorScreen.MyProtected.route
     ),
     DrawerMenuItem(
-        icon = Icons.Default.Rule,
+        icon = Icons.AutoMirrored.Filled.Rule,
         labelResId = R.string.menu_rules,
         route = MonitorScreen.Rules.route
     ),
