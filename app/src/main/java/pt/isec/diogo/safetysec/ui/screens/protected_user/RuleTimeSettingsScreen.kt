@@ -1,5 +1,6 @@
 package pt.isec.diogo.safetysec.ui.screens.protected_user
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,10 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,7 +24,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,7 +39,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import pt.isec.diogo.safetysec.R
@@ -57,6 +61,10 @@ fun RuleTimeSettingsScreen(
     var isScheduled by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
     var isSaving by remember { mutableStateOf(false) }
+    
+    var showStartTimePicker by remember { mutableStateOf(false) }
+    var showEndTimePicker by remember { mutableStateOf(false) }
+    
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(assignmentId) {
@@ -73,6 +81,42 @@ fun RuleTimeSettingsScreen(
             .onFailure {
                 isLoading = false
             }
+    }
+
+    // Start Time
+    if (showStartTimePicker) {
+        TimePickerDialog(
+            initialHour = startTime.split(":").getOrNull(0)?.toIntOrNull() ?: 9,
+            initialMinute = startTime.split(":").getOrNull(1)?.toIntOrNull() ?: 0,
+            onConfirm = { hour, minute ->
+                startTime = "%02d:%02d".format(hour, minute)
+                showStartTimePicker = false
+                // mete logo no outro campo +8h
+                if (endTime.isEmpty()) {
+                    val endHour = (hour + 8) % 24
+                    endTime = "%02d:%02d".format(endHour, minute)
+                }
+            },
+            onDismiss = { showStartTimePicker = false }
+        )
+    }
+
+    // End Time
+    if (showEndTimePicker) {
+        TimePickerDialog(
+            initialHour = endTime.split(":").getOrNull(0)?.toIntOrNull() ?: 17,
+            initialMinute = endTime.split(":").getOrNull(1)?.toIntOrNull() ?: 0,
+            onConfirm = { hour, minute ->
+                endTime = "%02d:%02d".format(hour, minute)
+                showEndTimePicker = false
+                // mete logo no outro campo -8h
+                if (startTime.isEmpty()) {
+                    val endHour = (hour - 8) % 24
+                    startTime = "%02d:%02d".format(endHour, minute)
+                }
+            },
+            onDismiss = { showEndTimePicker = false }
+        )
     }
 
     Scaffold(
@@ -165,41 +209,44 @@ fun RuleTimeSettingsScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     OutlinedTextField(
-                        value = startTime,
-                        onValueChange = { value ->
-                            if (value.length <= 5 && value.all { it.isDigit() || it == ':' }) {
-                                startTime = value
-                                // Auto-suggest end time (+8 hours)
-                                if (value.length == 5 && endTime.isEmpty()) {
-                                    val parts = value.split(":")
-                                    if (parts.size == 2) {
-                                        val hour = (parts[0].toIntOrNull() ?: 0)
-                                        val endHour = (hour + 8) % 24
-                                        endTime = "%02d:%s".format(endHour, parts[1])
-                                    }
-                                }
-                            }
-                        },
+                        value = startTime.ifEmpty { "--:--" },
+                        onValueChange = {},
+                        readOnly = true,
                         label = { Text(stringResource(R.string.start_time)) },
-                        placeholder = { Text("09:00") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { showStartTimePicker = true },
+                        enabled = false
                     )
 
                     OutlinedTextField(
-                        value = endTime,
-                        onValueChange = { value ->
-                            if (value.length <= 5 && value.all { it.isDigit() || it == ':' }) {
-                                endTime = value
-                            }
-                        },
+                        value = endTime.ifEmpty { "--:--" },
+                        onValueChange = {},
+                        readOnly = true,
                         label = { Text(stringResource(R.string.end_time)) },
-                        placeholder = { Text("17:00") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { showEndTimePicker = true },
+                        enabled = false
                     )
+                }
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    TextButton(
+                        onClick = { showStartTimePicker = true },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(stringResource(R.string.select_time))
+                    }
+                    TextButton(
+                        onClick = { showEndTimePicker = true },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(stringResource(R.string.select_time))
+                    }
                 }
             }
 
@@ -228,4 +275,39 @@ fun RuleTimeSettingsScreen(
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TimePickerDialog(
+    initialHour: Int,
+    initialMinute: Int,
+    onConfirm: (Int, Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val timePickerState = rememberTimePickerState(
+        initialHour = initialHour,
+        initialMinute = initialMinute,
+        is24Hour = true
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.select_time)) },
+        text = {
+            TimePicker(state = timePickerState)
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(timePickerState.hour, timePickerState.minute) }
+            ) {
+                Text(stringResource(R.string.confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
 }

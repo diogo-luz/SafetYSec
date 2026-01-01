@@ -49,7 +49,7 @@ fun CreateRuleScreen(
     onNavigateBack: () -> Unit,
     onSuccess: () -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("Fall Detection") }
     var selectedType by remember { mutableStateOf(RuleType.FALL_DETECTION) }
     var threshold by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }

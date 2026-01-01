@@ -106,6 +106,8 @@
     <string name="schedule_hint">Se desativado, a regra monitoriza 24/7. Se ativado, apenas durante as horas definidas.</string>
     <string name="delete">Eliminar</string>
     <string name="cancel">Cancelar</string>
+    <string name="confirm">Confirmar</string>
+    <string name="select_time">Selecionar Hora</string>
     <string name="delete_rule_title">Eliminar Regra</string>
     <string name="delete_rule_confirm">Tem a certeza que deseja eliminar "%1$s"? Isto irá remover todas as atribuições.</string>
 </resources>

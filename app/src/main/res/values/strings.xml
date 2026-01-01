@@ -106,6 +106,8 @@
     <string name="schedule_hint">If disabled, the rule monitors 24/7. If enabled, only during the set hours.</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="select_time">Select Time</string>
     <string name="delete_rule_title">Delete Rule</string>
     <string name="delete_rule_confirm">Are you sure you want to delete "%1$s"? This will remove all assignments.</string>
 </resources>
