@@ -25,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimeInput
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.TopAppBar
@@ -295,7 +296,7 @@ private fun TimePickerDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.select_time)) },
         text = {
-            TimePicker(state = timePickerState)
+            TimeInput(state = timePickerState)
         },
         confirmButton = {
             TextButton(

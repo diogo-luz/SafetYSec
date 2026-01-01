@@ -213,7 +213,7 @@ private fun RuleCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = getRuleTypeLabel(rule.type),
+                    text = getRuleTypeDisplayName(rule.type),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -242,18 +242,10 @@ private fun RuleCard(
     }
 }
 
-private fun getRuleTypeLabel(type: RuleType): String = when (type) {
-    RuleType.FALL_DETECTION -> "Fall Detection"
-    RuleType.ACCIDENT_DETECTION -> "Accident Detection"
-    RuleType.SPEED_LIMIT -> "Speed Limit"
-    RuleType.INACTIVITY -> "Inactivity Alert"
-    RuleType.GEOFENCE -> "Safe Zone"
-}
-
+@Composable
 private fun getThresholdLabel(type: RuleType, threshold: Double): String = when (type) {
     RuleType.SPEED_LIMIT -> "${threshold.toInt()} km/h"
     RuleType.INACTIVITY -> "${threshold.toInt()} min"
     RuleType.GEOFENCE -> "${threshold.toInt()} m radius"
     else -> ""
 }
-

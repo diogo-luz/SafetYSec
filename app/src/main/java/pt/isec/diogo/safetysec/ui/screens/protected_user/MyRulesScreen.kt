@@ -44,6 +44,7 @@ import pt.isec.diogo.safetysec.data.model.Rule
 import pt.isec.diogo.safetysec.data.model.RuleAssignment
 import pt.isec.diogo.safetysec.data.model.RuleType
 import pt.isec.diogo.safetysec.data.repository.RulesRepository
+import pt.isec.diogo.safetysec.ui.screens.monitor.getRuleTypeDisplayName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -170,7 +171,7 @@ private fun MyRuleCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = getRuleTypeLabel(rule.type),
+                    text = getRuleTypeDisplayName(rule.type),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -191,12 +192,4 @@ private fun MyRuleCard(
             )
         }
     }
-}
-
-private fun getRuleTypeLabel(type: RuleType): String = when (type) {
-    RuleType.FALL_DETECTION -> "Fall Detection"
-    RuleType.ACCIDENT_DETECTION -> "Accident Detection"
-    RuleType.SPEED_LIMIT -> "Speed Limit"
-    RuleType.INACTIVITY -> "Inactivity Alert"
-    RuleType.GEOFENCE -> "Safe Zone"
 }

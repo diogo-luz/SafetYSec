@@ -41,6 +41,15 @@ import pt.isec.diogo.safetysec.data.model.Rule
 import pt.isec.diogo.safetysec.data.model.RuleType
 import pt.isec.diogo.safetysec.data.repository.RulesRepository
 
+@Composable
+fun getRuleTypeDisplayName(type: RuleType): String = when (type) {
+    RuleType.FALL_DETECTION -> stringResource(R.string.rule_type_fall_detection)
+    RuleType.ACCIDENT_DETECTION -> stringResource(R.string.rule_type_accident_detection)
+    RuleType.SPEED_LIMIT -> stringResource(R.string.rule_type_speed_limit)
+    RuleType.INACTIVITY -> stringResource(R.string.rule_type_inactivity)
+    RuleType.GEOFENCE -> stringResource(R.string.rule_type_geofence)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateRuleScreen(
@@ -49,7 +58,8 @@ fun CreateRuleScreen(
     onNavigateBack: () -> Unit,
     onSuccess: () -> Unit
 ) {
-    var name by remember { mutableStateOf("Fall Detection") }
+    val defaultName = stringResource(R.string.rule_type_fall_detection)
+    var name by remember { mutableStateOf(defaultName) }
     var selectedType by remember { mutableStateOf(RuleType.FALL_DETECTION) }
     var threshold by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
@@ -72,6 +82,15 @@ fun CreateRuleScreen(
         RuleType.INACTIVITY -> stringResource(R.string.time_minutes)
         else -> ""
     }
+
+    // nomes das regras para o dropdown
+    val typeNames = mapOf(
+        RuleType.FALL_DETECTION to stringResource(R.string.rule_type_fall_detection),
+        RuleType.ACCIDENT_DETECTION to stringResource(R.string.rule_type_accident_detection),
+        RuleType.SPEED_LIMIT to stringResource(R.string.rule_type_speed_limit),
+        RuleType.INACTIVITY to stringResource(R.string.rule_type_inactivity),
+        RuleType.GEOFENCE to stringResource(R.string.rule_type_geofence)
+    )
 
     Scaffold(
         topBar = {
@@ -108,7 +127,7 @@ fun CreateRuleScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 OutlinedTextField(
-                    value = getRuleTypeDisplayName(selectedType),
+                    value = typeNames[selectedType] ?: "",
                     onValueChange = {},
                     readOnly = true,
                     label = { Text(stringResource(R.string.rule_type)) },
@@ -122,13 +141,13 @@ fun CreateRuleScreen(
                     onDismissRequest = { expanded = false }
                 ) {
                     availableTypes.forEach { type ->
+                        val typeName = typeNames[type] ?: ""
                         DropdownMenuItem(
-                            text = { Text(getRuleTypeDisplayName(type)) },
+                            text = { Text(typeName) },
                             onClick = {
                                 selectedType = type
                                 expanded = false
-                                
-                                name = getRuleTypeDisplayName(type)
+                                name = typeName
                                 if (type != RuleType.SPEED_LIMIT && type != RuleType.INACTIVITY) {
                                     threshold = ""
                                 }
@@ -198,12 +217,4 @@ fun CreateRuleScreen(
             }
         }
     }
-}
-
-private fun getRuleTypeDisplayName(type: RuleType): String = when (type) {
-    RuleType.FALL_DETECTION -> "Fall Detection"
-    RuleType.ACCIDENT_DETECTION -> "Accident Detection"
-    RuleType.SPEED_LIMIT -> "Speed Limit"
-    RuleType.INACTIVITY -> "Inactivity Alert"
-    RuleType.GEOFENCE -> "Safe Zone"
 }

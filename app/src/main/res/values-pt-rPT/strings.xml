@@ -110,4 +110,11 @@
     <string name="select_time">Selecionar Hora</string>
     <string name="delete_rule_title">Eliminar Regra</string>
     <string name="delete_rule_confirm">Tem a certeza que deseja eliminar "%1$s"? Isto irá remover todas as atribuições.</string>
+
+    <!-- Rule Types -->
+    <string name="rule_type_fall_detection">Deteção de Queda</string>
+    <string name="rule_type_accident_detection">Deteção de Acidente</string>
+    <string name="rule_type_speed_limit">Limite de Velocidade</string>
+    <string name="rule_type_inactivity">Alerta de Inatividade</string>
+    <string name="rule_type_geofence">Zona Segura</string>
 </resources>

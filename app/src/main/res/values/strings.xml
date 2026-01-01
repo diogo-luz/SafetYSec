@@ -110,4 +110,11 @@
     <string name="select_time">Select Time</string>
     <string name="delete_rule_title">Delete Rule</string>
     <string name="delete_rule_confirm">Are you sure you want to delete "%1$s"? This will remove all assignments.</string>
+
+    <!-- Rule Types -->
+    <string name="rule_type_fall_detection">Fall Detection</string>
+    <string name="rule_type_accident_detection">Accident Detection</string>
+    <string name="rule_type_speed_limit">Speed Limit</string>
+    <string name="rule_type_inactivity">Inactivity Alert</string>
+    <string name="rule_type_geofence">Safe Zone</string>
 </resources>
