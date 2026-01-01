@@ -69,4 +69,18 @@
     <string name="error_passwords_mismatch">As passwords não coincidem</string>
     <string name="error_password_too_short">A password deve ter pelo menos 6 caracteres</string>
     <string name="loading">A carregar…</string>
+
+    <!-- Association / OTP -->
+    <string name="add_protected">Adicionar Protegido</string>
+    <string name="add_monitor">Adicionar Monitor</string>
+    <string name="tap_add_protected">Toque em + para adicionar um protegido</string>
+    <string name="tap_add_monitor">Toque em + para gerar um código</string>
+    <string name="no_monitors">Ainda sem monitores</string>
+    <string name="enter_otp_title">Introduzir Código</string>
+    <string name="enter_otp_subtitle">Peça ao utilizador protegido o código de 6 dígitos</string>
+    <string name="otp_code">Código de 6 dígitos</string>
+    <string name="share_otp_title">Partilhe Este Código</string>
+    <string name="share_otp_subtitle">Dê este código ao seu monitor para que o possa adicionar</string>
+    <string name="otp_valid_10min">Válido por 10 minutos</string>
+    <string name="generate_new_code">Gerar Novo Código</string>
 </resources>

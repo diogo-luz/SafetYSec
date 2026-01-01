@@ -69,4 +69,18 @@
     <string name="error_passwords_mismatch">Passwords do not match</string>
     <string name="error_password_too_short">Password must be at least 6 characters</string>
     <string name="loading">Loading…</string>
+
+    <!-- Association / OTP -->
+    <string name="add_protected">Add Protected User</string>
+    <string name="add_monitor">Add Monitor</string>
+    <string name="tap_add_protected">Tap + to add a protected user</string>
+    <string name="tap_add_monitor">Tap + to generate a code</string>
+    <string name="no_monitors">No monitors yet</string>
+    <string name="enter_otp_title">Enter Code</string>
+    <string name="enter_otp_subtitle">Ask the protected user for their 6-digit code</string>
+    <string name="otp_code">6-digit code</string>
+    <string name="share_otp_title">Share This Code</string>
+    <string name="share_otp_subtitle">Give this code to your monitor so they can add you</string>
+    <string name="otp_valid_10min">Valid for 10 minutes</string>
+    <string name="generate_new_code">Generate New Code</string>
 </resources>

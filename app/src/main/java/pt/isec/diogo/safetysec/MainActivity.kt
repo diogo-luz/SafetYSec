@@ -29,8 +29,12 @@ import pt.isec.diogo.safetysec.ui.navigation.Screen
 import pt.isec.diogo.safetysec.ui.screens.common.LoginScreen
 import pt.isec.diogo.safetysec.ui.screens.common.ProfileSelectionScreen
 import pt.isec.diogo.safetysec.ui.screens.common.RegisterScreen
+import pt.isec.diogo.safetysec.ui.screens.monitor.AddProtectedScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.MonitorDashboardScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.MonitorProfileScreen
+import pt.isec.diogo.safetysec.ui.screens.monitor.MyProtectedScreen
+import pt.isec.diogo.safetysec.ui.screens.protected_user.AddMonitorScreen
+import pt.isec.diogo.safetysec.ui.screens.protected_user.MyMonitorsScreen
 import pt.isec.diogo.safetysec.ui.screens.protected_user.ProtectedDashboardScreen
 import pt.isec.diogo.safetysec.ui.screens.protected_user.ProtectedProfileScreen
 import pt.isec.diogo.safetysec.ui.theme.SafetYSecTheme
@@ -145,8 +149,10 @@ class MainActivity : ComponentActivity() {
                                         MonitorScreen.Profile.route -> {
                                             navController.navigate("monitor_profile")
                                         }
+                                        MonitorScreen.MyProtected.route -> {
+                                            navController.navigate("monitor_my_protected")
+                                        }
                                         else -> {
-                                            // Placeholder para outras screens
                                             navController.navigate("monitor_placeholder/$route")
                                         }
                                     }
@@ -185,6 +191,35 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        // My Protected Users (Monitor)
+                        composable("monitor_my_protected") {
+                            currentMonitorRoute = MonitorScreen.MyProtected.route
+                            MyProtectedScreen(
+                                currentUserId = authViewModel.currentUser?.uid,
+                                associationRepository = app.associationRepository,
+                                onNavigateBack = {
+                                    navController.popBackStack()
+                                },
+                                onAddProtected = {
+                                    navController.navigate("monitor_add_protected")
+                                }
+                            )
+                        }
+
+                        // Add Protected User (Monitor - OTP input)
+                        composable("monitor_add_protected") {
+                            AddProtectedScreen(
+                                currentUserId = authViewModel.currentUser?.uid,
+                                associationRepository = app.associationRepository,
+                                onNavigateBack = {
+                                    navController.popBackStack()
+                                },
+                                onSuccess = {
+                                    navController.popBackStack()
+                                }
+                            )
+                        }
+
                         // Monitor Placeholder screens
                         composable("monitor_placeholder/{route}") { backStackEntry ->
                             val route = backStackEntry.arguments?.getString("route") ?: ""
@@ -203,6 +238,9 @@ class MainActivity : ComponentActivity() {
                                         ProtectedScreen.Dashboard.route -> { /* Already here */ }
                                         ProtectedScreen.Profile.route -> {
                                             navController.navigate("protected_profile")
+                                        }
+                                        ProtectedScreen.MyMonitors.route -> {
+                                            navController.navigate("protected_my_monitors")
                                         }
                                         else -> {
                                             navController.navigate("protected_placeholder/$route")
@@ -242,6 +280,32 @@ class MainActivity : ComponentActivity() {
                                             authViewModel.refreshUser()
                                         }
                                     }
+                                }
+                            )
+                        }
+
+                        // My Monitors (Protected)
+                        composable("protected_my_monitors") {
+                            currentProtectedRoute = ProtectedScreen.MyMonitors.route
+                            MyMonitorsScreen(
+                                currentUserId = authViewModel.currentUser?.uid,
+                                associationRepository = app.associationRepository,
+                                onNavigateBack = {
+                                    navController.popBackStack()
+                                },
+                                onAddMonitor = {
+                                    navController.navigate("protected_add_monitor")
+                                }
+                            )
+                        }
+
+                        // Add Monitor (Protected - OTP generation)
+                        composable("protected_add_monitor") {
+                            AddMonitorScreen(
+                                currentUserId = authViewModel.currentUser?.uid,
+                                associationRepository = app.associationRepository,
+                                onNavigateBack = {
+                                    navController.popBackStack()
                                 }
                             )
                         }
