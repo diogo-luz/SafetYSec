@@ -82,6 +82,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     //gmaps
     implementation(libs.maps.compose)
+    //location services
+    implementation(libs.play.services.location)
 
     //icons material3
     implementation(libs.androidx.compose.material.icons.extended)
