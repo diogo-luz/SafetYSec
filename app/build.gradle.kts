@@ -74,6 +74,7 @@ dependencies {
     // https://firebase.google.com/docs/android/setup#available-libraries
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
 
     // ViewModel Compose integration
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -87,6 +88,17 @@ dependencies {
 
     //icons material3
     implementation(libs.androidx.compose.material.icons.extended)
+
+    // CameraX
+    implementation(libs.camera.core)
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.video)
+    implementation(libs.camera.view)
+
+    // Media3 ExoPlayer
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
