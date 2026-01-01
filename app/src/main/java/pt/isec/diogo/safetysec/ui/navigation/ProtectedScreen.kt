@@ -5,6 +5,7 @@ package pt.isec.diogo.safetysec.ui.navigation
  */
 sealed class ProtectedScreen(val route: String) {
     data object Dashboard : ProtectedScreen("protected_dashboard")
+    data object AlertsSafety : ProtectedScreen("protected_alerts_safety")
     data object MyMonitors : ProtectedScreen("protected_my_monitors")
     data object MyRules : ProtectedScreen("protected_my_rules")
     data object Profile : ProtectedScreen("protected_profile")

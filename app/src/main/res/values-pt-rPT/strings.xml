@@ -35,6 +35,7 @@
     <string name="menu_my_rules">As Minhas Regras</string>
     <string name="menu_safe_zones">Zonas Seguras</string>
     <string name="menu_alerts">Alertas</string>
+    <string name="menu_alerts_safety">Alertas e Segurança</string>
     <string name="menu_profile">Perfil</string>
 
     <!-- Monitor Dashboard -->
