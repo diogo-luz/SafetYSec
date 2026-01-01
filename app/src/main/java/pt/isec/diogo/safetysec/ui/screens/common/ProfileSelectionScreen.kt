@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Shield
@@ -44,10 +47,12 @@ fun ProfileSelectionScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Welcome msg
         Text(
@@ -64,20 +69,20 @@ fun ProfileSelectionScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
-
         Text(
             text = stringResource(R.string.select_profile),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Cards do tipo de perfil
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = 600.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Monitor Card
             ProfileCard(
@@ -87,8 +92,6 @@ fun ProfileSelectionScreen(
                 onClick = onSelectMonitor,
                 modifier = Modifier.weight(1f)
             )
-
-            Spacer(modifier = Modifier.width(16.dp))
 
             // Protected Card
             ProfileCard(
@@ -100,7 +103,7 @@ fun ProfileSelectionScreen(
             )
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Logout
         TextButton(onClick = onLogout) {
@@ -110,7 +113,7 @@ fun ProfileSelectionScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -125,8 +128,7 @@ private fun ProfileCard(
 ) {
     Card(
         onClick = onClick,
-        modifier = modifier
-            .height(180.dp),
+        modifier = modifier,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -134,7 +136,8 @@ private fun ProfileCard(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .height(180.dp)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
