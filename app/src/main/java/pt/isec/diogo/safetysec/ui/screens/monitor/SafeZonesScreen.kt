@@ -114,12 +114,7 @@ fun SafeZonesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.menu_safe_zones)) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
-                    }
-                }
+                title = { Text(stringResource(R.string.menu_safe_zones)) }
             )
         },
         floatingActionButton = {
