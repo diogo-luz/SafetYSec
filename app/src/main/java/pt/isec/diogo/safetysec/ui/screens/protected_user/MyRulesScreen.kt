@@ -233,6 +233,26 @@ private fun MyRuleCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                // Show threshold info for Speed Limit and Inactivity
+                rule.threshold?.let { threshold ->
+                    when (rule.type) {
+                        RuleType.SPEED_LIMIT -> {
+                            Text(
+                                text = stringResource(R.string.speed_limit_value, threshold.toInt()),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        }
+                        RuleType.INACTIVITY -> {
+                            Text(
+                                text = stringResource(R.string.inactivity_value, threshold.toInt()),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        }
+                        else -> {}
+                    }
+                }
                 if (assignment.startTime != null && assignment.endTime != null) {
                     Text(
                         text = "${assignment.startTime} - ${assignment.endTime}",

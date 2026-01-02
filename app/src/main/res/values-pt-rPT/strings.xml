@@ -213,4 +213,6 @@
     <string name="edit_rule">Editar Regra</string>
     <string name="rule_active">Ativa</string>
     <string name="rule_not_found">Regra não encontrada</string>
+    <string name="speed_limit_value">Máx: %1$d km/h</string>
+    <string name="inactivity_value">Após: %1$d min</string>
 </resources>
