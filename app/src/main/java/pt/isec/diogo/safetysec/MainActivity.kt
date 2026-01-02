@@ -294,7 +294,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 onAlertClick = { alertId ->
-                                    navController.navigate("alert_detail/$alertId")
+                                    navController.navigate(MonitorScreen.AlertDetail.createRoute(alertId))
                                 }
                             )
                         }
