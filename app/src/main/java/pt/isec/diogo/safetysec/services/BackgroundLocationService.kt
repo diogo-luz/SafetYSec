@@ -527,12 +527,12 @@ class BackgroundLocationService : Service(), SensorEventListener {
     
     private fun showCountdownNotification(triggerType: AlertTriggerType, secondsLeft: Int) {
         val alertTitle = when (triggerType) {
-            AlertTriggerType.GEOFENCE_VIOLATION -> "Left Safe Zone!"
-            AlertTriggerType.SPEED_LIMIT -> "Speed Limit Exceeded!"
-            AlertTriggerType.FALL_DETECTION -> "Fall Detected!"
-            AlertTriggerType.ACCIDENT_DETECTION -> "Accident Detected!"
-            AlertTriggerType.INACTIVITY -> "Inactivity Alert!"
-            else -> "Safety Alert!"
+            AlertTriggerType.GEOFENCE_VIOLATION -> getString(R.string.alert_title_geofence)
+            AlertTriggerType.SPEED_LIMIT -> getString(R.string.alert_title_speed)
+            AlertTriggerType.FALL_DETECTION -> getString(R.string.alert_title_fall)
+            AlertTriggerType.ACCIDENT_DETECTION -> getString(R.string.alert_title_accident)
+            AlertTriggerType.INACTIVITY -> getString(R.string.alert_title_inactivity)
+            else -> getString(R.string.alert_title_safety)
         }
         
         val cancelIntent = Intent(this, MainActivity::class.java).apply {
@@ -551,7 +551,7 @@ class BackgroundLocationService : Service(), SensorEventListener {
         
         val notification = NotificationCompat.Builder(this, ALERT_CHANNEL_ID)
             .setContentTitle(alertTitle)
-            .setContentText("Alert in $secondsLeft seconds - Tap to cancel")
+            .setContentText(getString(R.string.alert_countdown_message, secondsLeft))
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
@@ -569,12 +569,12 @@ class BackgroundLocationService : Service(), SensorEventListener {
     
     private fun showAlertCreatedNotification(triggerType: AlertTriggerType, alertId: String) {
         val alertTitle = when (triggerType) {
-            AlertTriggerType.GEOFENCE_VIOLATION -> "Alert Sent - Left Safe Zone"
-            AlertTriggerType.SPEED_LIMIT -> "Alert Sent - Speed Limit"
-            AlertTriggerType.FALL_DETECTION -> "Alert Sent - Fall Detected"
-            AlertTriggerType.ACCIDENT_DETECTION -> "Alert Sent - Accident Detected"
-            AlertTriggerType.INACTIVITY -> "Alert Sent - Inactivity"
-            else -> "Alert Sent"
+            AlertTriggerType.GEOFENCE_VIOLATION -> getString(R.string.alert_sent_geofence)
+            AlertTriggerType.SPEED_LIMIT -> getString(R.string.alert_sent_speed)
+            AlertTriggerType.FALL_DETECTION -> getString(R.string.alert_sent_fall)
+            AlertTriggerType.ACCIDENT_DETECTION -> getString(R.string.alert_sent_accident)
+            AlertTriggerType.INACTIVITY -> getString(R.string.alert_sent_inactivity)
+            else -> getString(R.string.alert_sent_generic)
         }
         
         val recordIntent = Intent(this, MainActivity::class.java).apply {
@@ -590,7 +590,7 @@ class BackgroundLocationService : Service(), SensorEventListener {
         
         val notification = NotificationCompat.Builder(this, ALERT_CHANNEL_ID)
             .setContentTitle(alertTitle)
-            .setContentText("Monitors notified - Tap to record video")
+            .setContentText(getString(R.string.alert_monitors_notified))
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(recordPendingIntent)
@@ -605,18 +605,18 @@ class BackgroundLocationService : Service(), SensorEventListener {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val serviceChannel = NotificationChannel(
                 CHANNEL_ID,
-                "Location Monitoring",
+                getString(R.string.notification_channel_location),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "SafetYSec is monitoring your location"
+                description = getString(R.string.notification_channel_location_desc)
             }
             
             val alertChannel = NotificationChannel(
                 ALERT_CHANNEL_ID,
-                "Safety Alerts",
+                getString(R.string.notification_channel_alerts),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Critical safety alerts"
+                description = getString(R.string.notification_channel_alerts_desc)
                 enableVibration(true)
                 enableLights(true)
             }
@@ -636,7 +636,7 @@ class BackgroundLocationService : Service(), SensorEventListener {
         
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
-            .setContentText("Monitoring your safety")
+            .setContentText(getString(R.string.notification_monitoring_safety))
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
             .setOngoing(true)

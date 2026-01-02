@@ -197,7 +197,7 @@
     <string name="inactivity_alert_subtitle">Sem atividade detetada. Insira o PIN para cancelar este alerta.</string>
 
     <!-- Monitoring Service -->
-    <string name="location_monitoring">Monitorização de Localização</string>
+    <string name="real_time_monitoring">Monitorização em tempo real</string>
     <string name="monitoring_active">Ativo - A monitorizar a sua segurança</string>
     <string name="monitoring_inactive">Inativo - Toque para ativar</string>
     
@@ -231,4 +231,39 @@
     <string name="forgot_password_description">Introduza o seu email e enviaremos um link para repor a sua palavra-passe.</string>
     <string name="reset_email_sent">Email de reposição enviado! Verifique a sua caixa de entrada.</string>
     <string name="send">Enviar</string>
+    
+    <!-- Form Errors -->
+    <string name="error_passwords_no_match">As passwords não coincidem</string>
+    <string name="error_password_min_length">A password deve ter pelo menos 6 caracteres</string>
+    <string name="error_enter_email">Por favor introduza o seu email</string>
+    <string name="error_camera_not_initialized">Câmara não inicializada</string>
+    <string name="error_recording_failed">Gravação falhou: %1$s</string>
+    <string name="error_permissions_denied">Permissões negadas</string>
+    
+    <!-- Notifications - Service -->
+    <string name="notification_monitoring_safety">A monitorizar a sua segurança</string>
+    <string name="notification_channel_location">Monitorização de Localização</string>
+    <string name="notification_channel_location_desc">SafetYSec está a monitorizar a sua localização</string>
+    <string name="notification_channel_alerts">Alertas de Segurança</string>
+    <string name="notification_channel_alerts_desc">Alertas críticos de segurança</string>
+    
+    <!-- Notifications - Alerts Titles -->
+    <string name="alert_title_geofence">Saiu da Zona Segura!</string>
+    <string name="alert_title_speed">Limite de Velocidade Excedido!</string>
+    <string name="alert_title_fall">Queda Detetada!</string>
+    <string name="alert_title_accident">Acidente Detetado!</string>
+    <string name="alert_title_inactivity">Alerta de Inatividade!</string>
+    <string name="alert_title_safety">Alerta de Segurança!</string>
+    
+    <!-- Notifications - Alert Sent Titles -->
+    <string name="alert_sent_geofence">Alerta Enviado - Saiu da Zona Segura</string>
+    <string name="alert_sent_speed">Alerta Enviado - Limite de Velocidade</string>
+    <string name="alert_sent_fall">Alerta Enviado - Queda Detetada</string>
+    <string name="alert_sent_accident">Alerta Enviado - Acidente Detetado</string>
+    <string name="alert_sent_inactivity">Alerta Enviado - Inatividade</string>
+    <string name="alert_sent_generic">Alerta Enviado</string>
+    
+    <!-- Notifications - Alert Messages -->
+    <string name="alert_countdown_message">Alerta em %1$d segundos - Toque para cancelar</string>
+    <string name="alert_monitors_notified">Monitores notificados - Toque para gravar vídeo</string>
 </resources>

@@ -197,7 +197,7 @@
     <string name="inactivity_alert_subtitle">No activity detected. Enter your PIN to cancel this alert.</string>
 
     <!-- Monitoring Service -->
-    <string name="location_monitoring">Location Monitoring</string>
+    <string name="real_time_monitoring">Real-time Monitoring</string>
     <string name="monitoring_active">Active - Monitoring your safety</string>
     <string name="monitoring_inactive">Inactive - Tap to enable</string>
     
@@ -231,4 +231,39 @@
     <string name="forgot_password_description">Enter your email address and we\'ll send you a link to reset your password.</string>
     <string name="reset_email_sent">Password reset email sent! Check your inbox.</string>
     <string name="send">Send</string>
+    
+    <!-- Form Errors -->
+    <string name="error_passwords_no_match">Passwords do not match</string>
+    <string name="error_password_min_length">Password must be at least 6 characters</string>
+    <string name="error_enter_email">Please enter your email</string>
+    <string name="error_camera_not_initialized">Camera not initialized</string>
+    <string name="error_recording_failed">Recording failed: %1$s</string>
+    <string name="error_permissions_denied">Permissions denied</string>
+    
+    <!-- Notifications - Service -->
+    <string name="notification_monitoring_safety">Monitoring your safety</string>
+    <string name="notification_channel_location">Location Monitoring</string>
+    <string name="notification_channel_location_desc">SafetYSec is monitoring your location</string>
+    <string name="notification_channel_alerts">Safety Alerts</string>
+    <string name="notification_channel_alerts_desc">Critical safety alerts</string>
+    
+    <!-- Notifications - Alerts Titles -->
+    <string name="alert_title_geofence">Left Safe Zone!</string>
+    <string name="alert_title_speed">Speed Limit Exceeded!</string>
+    <string name="alert_title_fall">Fall Detected!</string>
+    <string name="alert_title_accident">Accident Detected!</string>
+    <string name="alert_title_inactivity">Inactivity Alert!</string>
+    <string name="alert_title_safety">Safety Alert!</string>
+    
+    <!-- Notifications - Alert Sent Titles -->
+    <string name="alert_sent_geofence">Alert Sent - Left Safe Zone</string>
+    <string name="alert_sent_speed">Alert Sent - Speed Limit</string>
+    <string name="alert_sent_fall">Alert Sent - Fall Detected</string>
+    <string name="alert_sent_accident">Alert Sent - Accident Detected</string>
+    <string name="alert_sent_inactivity">Alert Sent - Inactivity</string>
+    <string name="alert_sent_generic">Alert Sent</string>
+    
+    <!-- Notifications - Alert Messages -->
+    <string name="alert_countdown_message">Alert in %1$d seconds - Tap to cancel</string>
+    <string name="alert_monitors_notified">Monitors notified - Tap to record video</string>
 </resources>

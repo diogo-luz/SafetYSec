@@ -263,7 +263,7 @@ fun ProtectedDashboardScreen(
                             )
                             Column {
                                 Text(
-                                    text = stringResource(R.string.location_monitoring),
+                                    text = stringResource(R.string.real_time_monitoring),
                                     style = MaterialTheme.typography.titleMedium
                                 )
                                 Text(
