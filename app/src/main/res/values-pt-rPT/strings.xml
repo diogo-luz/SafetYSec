@@ -200,4 +200,14 @@
     <string name="location_monitoring">Monitorização de Localização</string>
     <string name="monitoring_active">Ativo - A monitorizar a sua segurança</string>
     <string name="monitoring_inactive">Inativo - Toque para ativar</string>
+    
+    <!-- Monitor Dashboard -->
+    <string name="hello_greeting">Olá, %1$s</string>
+    <string name="monitor_welcome_message">Resumo da proteção</string>
+    <string name="protected_users_label">Protegidos</string>
+    <string name="active_alerts_label">Alertas</string>
+    <string name="rules_active_label">Regras</string>
+    <string name="my_protected_users">Os Meus Protegidos</string>
+    <string name="status_alert">Alerta!</string>
+    <string name="recent_alerts">Alertas Recentes</string>
 </resources>

@@ -291,6 +291,9 @@ class MainActivity : ComponentActivity() {
                                             popUpTo(0) { inclusive = true }
                                         }
                                     }
+                                },
+                                onAlertClick = { alertId ->
+                                    navController.navigate("alert_detail/$alertId")
                                 }
                             )
                         }

@@ -200,4 +200,14 @@
     <string name="location_monitoring">Location Monitoring</string>
     <string name="monitoring_active">Active - Monitoring your safety</string>
     <string name="monitoring_inactive">Inactive - Tap to enable</string>
+    
+    <!-- Monitor Dashboard -->
+    <string name="hello_greeting">Hello, %1$s</string>
+    <string name="monitor_welcome_message">Here\'s your protection overview</string>
+    <string name="protected_users_label">Protected</string>
+    <string name="active_alerts_label">Alerts</string>
+    <string name="rules_active_label">Rules</string>
+    <string name="my_protected_users">My Protected Users</string>
+    <string name="status_alert">Alert!</string>
+    <string name="recent_alerts">Recent Alerts</string>
 </resources>
