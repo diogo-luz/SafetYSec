@@ -6,6 +6,10 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.location.Location
 import android.os.Build
 import android.os.CountDownTimer
@@ -37,8 +41,9 @@ import pt.isec.diogo.safetysec.data.repository.AuthRepository
 import pt.isec.diogo.safetysec.data.repository.RulesRepository
 import pt.isec.diogo.safetysec.utils.GeofenceChecker
 import com.google.firebase.auth.FirebaseAuth
+import kotlin.math.sqrt
 
-class BackgroundLocationService : Service() {
+class BackgroundLocationService : Service(), SensorEventListener {
     
     companion object {
         private const val TAG = "BackgroundLocationSvc"
@@ -68,15 +73,28 @@ class BackgroundLocationService : Service() {
     private lateinit var authRepository: AuthRepository
     private lateinit var geofenceChecker: GeofenceChecker
     
+    // Sensor Manager
+    private lateinit var sensorManager: SensorManager
+    private var accelerometer: Sensor? = null
+    
     private var lastLocation: Location? = null
     private var geofenceRules: List<Rule> = emptyList()
     private var speedLimitKmh: Double? = null
+    
+    // Flags de regras de sensores (para bateria!)
+    private var isFallDetectionActive = false
+    private var isAccidentDetectionActive = false
+    
     private var currentUserId: String? = null
     private var currentUser: User? = null
     
     private var isAlertTriggered = false
     private var countdownTimer: CountDownTimer? = null
     private var pendingTriggerType: AlertTriggerType? = null
+    
+    // Cooldown sensores
+    private var lastSensorTriggerTime: Long = 0
+    private val SENSOR_COOLDOWN_MS = 5000L // 5 segundos entre deteções
     
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(result: LocationResult) {
@@ -93,6 +111,10 @@ class BackgroundLocationService : Service() {
         alertsRepository = AlertsRepository()
         authRepository = AuthRepository()
         geofenceChecker = GeofenceChecker()
+        
+        // init sensores
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         
         currentUserId = FirebaseAuth.getInstance().currentUser?.uid
         
@@ -113,6 +135,7 @@ class BackgroundLocationService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         stopLocationUpdates()
+        stopSensorMonitoring() // Garante que para sensores
         countdownTimer?.cancel()
         isCountdownActive = false
         isServiceRunning = false
@@ -130,8 +153,73 @@ class BackgroundLocationService : Service() {
         startLocationUpdates()
     }
     
+    private fun startSensorMonitoring() {
+        if (accelerometer == null) return
+        
+        try {
+            sensorManager.unregisterListener(this) // Limpar primeiro
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI)
+            Log.d(TAG, "Sensor monitoring started (Fall: $isFallDetectionActive, Accident: $isAccidentDetectionActive)")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error starting sensor monitoring", e)
+        }
+    }
+    
+    private fun stopSensorMonitoring() {
+        try {
+            sensorManager.unregisterListener(this)
+            Log.d(TAG, "Sensor monitoring stopped")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error stopping sensor monitoring", e)
+        }
+    }
+    
+    override fun onSensorChanged(event: SensorEvent?) {
+        event?.let {
+            if (it.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+                if (isAlertTriggered || isCountdownActive) return
+                if (System.currentTimeMillis() - lastSensorTriggerTime < SENSOR_COOLDOWN_MS) return
+                
+                val x = it.values[0]
+                val y = it.values[1]
+                val z = it.values[2]
+                
+                // força-g -> aula teórica
+                val magnitude = sqrt(x * x + y * y + z * z)
+                val gForce = magnitude / 9.81
+                
+                // Thresholds
+                val FALL_THRESHOLD_G = 2.5 // Queda (~2.5G)
+                val ACCIDENT_THRESHOLD_G = 4.0 // Acidente (~4.0G)
+                
+                when {
+                    isAccidentDetectionActive && gForce > ACCIDENT_THRESHOLD_G -> {
+                        Log.w(TAG, "Accident Detected! G-Force: $gForce")
+                        lastSensorTriggerTime = System.currentTimeMillis()
+                        triggerAlert(AlertTriggerType.ACCIDENT_DETECTION)
+                    }
+                    isFallDetectionActive && gForce > FALL_THRESHOLD_G -> {
+                        Log.w(TAG, "Fall Detected! G-Force: $gForce")
+                        lastSensorTriggerTime = System.currentTimeMillis()
+                        triggerAlert(AlertTriggerType.FALL_DETECTION)
+                    }
+                }
+            }
+        }
+    }
+    
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        // yolo
+    }
+    
     private fun loadUserAndRules() {
         val userId = currentUserId ?: return
+        
+        // Reset flags
+        isFallDetectionActive = false
+        isAccidentDetectionActive = false
+        geofenceRules = emptyList()
+        speedLimitKmh = null
         
         serviceScope.launch {
             // Carregar dados (nome e cancellationTimer)
@@ -155,11 +243,26 @@ class BackgroundLocationService : Service() {
                                 geofenceRules = geofenceRules + rule
                                 Log.d(TAG, "Added geofence: ${rule.name}")
                             }
+                            RuleType.FALL_DETECTION -> {
+                                isFallDetectionActive = true
+                                Log.d(TAG, "Fall Detection Active")
+                            }
+                            RuleType.ACCIDENT_DETECTION -> {
+                                isAccidentDetectionActive = true
+                                Log.d(TAG, "Accident Detection Active")
+                            }
                             else -> {}
                         }
                     }
                 }
-                Log.d(TAG, "Loaded ${geofenceRules.size} geofence rules")
+                Log.d(TAG, "Loaded Rules: Geo(${geofenceRules.size}), Speed($speedLimitKmh), Fall($isFallDetectionActive), Accident($isAccidentDetectionActive)")
+                
+                // Ativar/Desativar sensores com base nas regras
+                if (isFallDetectionActive || isAccidentDetectionActive) {
+                    startSensorMonitoring()
+                } else {
+                    stopSensorMonitoring()
+                }
             }
         }
     }
@@ -262,7 +365,7 @@ class BackgroundLocationService : Service() {
         android.os.Handler(Looper.getMainLooper()).postDelayed({
             isAlertTriggered = false
             Log.d(TAG, "Cooldown ended - ready for new alerts")
-        }, 60000) // 60 segundos de cooldown
+        }, 30000) // 30 segundos de cooldown
     }
     
     private fun createAlertAndNotify(triggerType: AlertTriggerType) {
@@ -300,6 +403,8 @@ class BackgroundLocationService : Service() {
         val alertTitle = when (triggerType) {
             AlertTriggerType.GEOFENCE_VIOLATION -> "Left Safe Zone!"
             AlertTriggerType.SPEED_LIMIT -> "Speed Limit Exceeded!"
+            AlertTriggerType.FALL_DETECTION -> "Fall Detected!"
+            AlertTriggerType.ACCIDENT_DETECTION -> "Accident Detected!"
             else -> "Safety Alert!"
         }
         
@@ -339,6 +444,8 @@ class BackgroundLocationService : Service() {
         val alertTitle = when (triggerType) {
             AlertTriggerType.GEOFENCE_VIOLATION -> "Alert Sent - Left Safe Zone"
             AlertTriggerType.SPEED_LIMIT -> "Alert Sent - Speed Limit"
+            AlertTriggerType.FALL_DETECTION -> "Alert Sent - Fall Detected"
+            AlertTriggerType.ACCIDENT_DETECTION -> "Alert Sent - Accident Detected"
             else -> "Alert Sent"
         }
         
