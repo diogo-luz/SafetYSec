@@ -35,6 +35,7 @@ import pt.isec.diogo.safetysec.data.model.Alert
 import pt.isec.diogo.safetysec.data.model.AlertStatus
 import pt.isec.diogo.safetysec.data.model.AlertTriggerType
 import pt.isec.diogo.safetysec.data.model.Rule
+import pt.isec.diogo.safetysec.data.model.RuleAssignment
 import pt.isec.diogo.safetysec.data.model.RuleType
 import pt.isec.diogo.safetysec.data.model.User
 import pt.isec.diogo.safetysec.data.repository.AlertsRepository
@@ -56,6 +57,7 @@ class BackgroundLocationService : Service(), SensorEventListener {
         const val ACTION_START = "ACTION_START"
         const val ACTION_STOP = "ACTION_STOP"
         const val ACTION_CANCEL_COUNTDOWN = "ACTION_CANCEL_COUNTDOWN"
+        const val ACTION_RELOAD_RULES = "ACTION_RELOAD_RULES"
         const val EXTRA_TRIGGER_TYPE = "trigger_type"
         const val EXTRA_SECONDS_LEFT = "seconds_left"
         
@@ -95,9 +97,19 @@ class BackgroundLocationService : Service(), SensorEventListener {
     private var inactivityThresholdMinutes: Double? = null
     private var lastMovementTime: Long = 0
     private val inactivityHandler = Handler(Looper.getMainLooper())
+    private var scheduleCheckCounter = 0
     private val inactivityRunnable = object : Runnable {
         override fun run() {
             checkInactivity()
+            
+            // A cada 5 minutos, recarregar regras para verificar horários
+            scheduleCheckCounter++
+            if (scheduleCheckCounter >= 5) {
+                scheduleCheckCounter = 0
+                Log.d(TAG, "Periodic schedule check - reloading rules")
+                loadUserAndRules()
+            }
+            
             inactivityHandler.postDelayed(this, 60000) // Verificar a cada 1 minuto
         }
     }
@@ -146,6 +158,10 @@ class BackgroundLocationService : Service(), SensorEventListener {
             ACTION_START -> startLocationMonitoring()
             ACTION_STOP -> stopSelf()
             ACTION_CANCEL_COUNTDOWN -> cancelCountdown()
+            ACTION_RELOAD_RULES -> {
+                Log.d(TAG, "Reloading rules...")
+                loadUserAndRules()
+            }
         }
         return START_STICKY
     }
@@ -267,7 +283,8 @@ class BackgroundLocationService : Service(), SensorEventListener {
             
             rulesRepository.getAssignmentsForProtected(userId).onSuccess { rulesWithAssignments ->
                 rulesWithAssignments.forEach { (rule, assignment) ->
-                    if (assignment.isAccepted && rule.isActive) {
+                    // Verificar se aceite, ativa E dentro do horário
+                    if (assignment.isAccepted && rule.isActive && isWithinSchedule(assignment)) {
                         when (rule.type) {
                             RuleType.SPEED_LIMIT -> {
                                 speedLimitKmh = rule.threshold
@@ -277,8 +294,14 @@ class BackgroundLocationService : Service(), SensorEventListener {
                                 geofenceRules = geofenceRules + rule
                                 Log.d(TAG, "Added geofence: ${rule.name}")
                             }
-                            RuleType.FALL_DETECTION -> isFallDetectionActive = true
-                            RuleType.ACCIDENT_DETECTION -> isAccidentDetectionActive = true
+                            RuleType.FALL_DETECTION -> {
+                                isFallDetectionActive = true
+                                Log.d(TAG, "Fall Detection Active")
+                            }
+                            RuleType.ACCIDENT_DETECTION -> {
+                                isAccidentDetectionActive = true
+                                Log.d(TAG, "Accident Detection Active")
+                            }
                             RuleType.INACTIVITY -> {
                                 isInactivityMonitorActive = true
                                 inactivityThresholdMinutes = rule.threshold
@@ -289,6 +312,8 @@ class BackgroundLocationService : Service(), SensorEventListener {
                     }
                 }
                 
+                Log.d(TAG, "Rules loaded: Geo(${geofenceRules.size}), Speed($speedLimitKmh), Fall($isFallDetectionActive), Acc($isAccidentDetectionActive), Inact($isInactivityMonitorActive)")
+                
                 // Ativar sensores se qualquer regra que precise deles estiver ativa
                 if (isFallDetectionActive || isAccidentDetectionActive || isInactivityMonitorActive) {
                     startSensorMonitoring()
@@ -296,6 +321,43 @@ class BackgroundLocationService : Service(), SensorEventListener {
                     stopSensorMonitoring()
                 }
             }
+        }
+    }
+    
+    /**
+     * Verifica se a hora atual está dentro do horário agendado da regra.
+     * Se não houver horário definido (startTime/endTime null), a regra está sempre ativa.
+     */
+    private fun isWithinSchedule(assignment: RuleAssignment): Boolean {
+        val startTime = assignment.startTime
+        val endTime = assignment.endTime
+        
+        // Sem horário = sempre ativo
+        if (startTime.isNullOrEmpty() || endTime.isNullOrEmpty()) {
+            return true
+        }
+        
+        try {
+            val now = java.util.Calendar.getInstance()
+            val currentMinutes = now.get(java.util.Calendar.HOUR_OF_DAY) * 60 + now.get(java.util.Calendar.MINUTE)
+            
+            val startParts = startTime.split(":")
+            val endParts = endTime.split(":")
+            
+            val startMinutes = startParts[0].toInt() * 60 + startParts[1].toInt()
+            val endMinutes = endParts[0].toInt() * 60 + endParts[1].toInt()
+            
+            // Verificação simples (não atravessa meia-noite)
+            val isWithin = currentMinutes in startMinutes..endMinutes
+            
+            if (!isWithin) {
+                Log.d(TAG, "Rule outside schedule: current=$currentMinutes, range=$startMinutes-$endMinutes")
+            }
+            
+            return isWithin
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing schedule", e)
+            return true // Em caso de erro, permitir regra
         }
     }
     

@@ -47,6 +47,9 @@ import pt.isec.diogo.safetysec.R
 import pt.isec.diogo.safetysec.data.model.Rule
 import pt.isec.diogo.safetysec.data.model.RuleAssignment
 import pt.isec.diogo.safetysec.data.repository.RulesRepository
+import pt.isec.diogo.safetysec.services.BackgroundLocationService
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -254,6 +257,7 @@ fun RuleTimeSettingsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            val context = LocalContext.current
             Button(
                 onClick = {
                     assignment?.let { a ->
@@ -265,6 +269,14 @@ fun RuleTimeSettingsScreen(
                                 endTime = if (isScheduled && endTime.isNotEmpty()) endTime else null
                             )
                             rulesRepository.updateAssignment(updated)
+                            
+                            // Recarregar regras no serviço se estiver a correr
+                            if (BackgroundLocationService.isServiceRunning) {
+                                val intent = Intent(context, BackgroundLocationService::class.java)
+                                intent.action = BackgroundLocationService.ACTION_RELOAD_RULES
+                                context.startService(intent)
+                            }
+                            
                             isSaving = false
                             onNavigateBack()
                         }

@@ -41,8 +41,12 @@ import pt.isec.diogo.safetysec.data.model.RuleAssignment
 import pt.isec.diogo.safetysec.data.model.RuleType
 import pt.isec.diogo.safetysec.data.model.User
 import pt.isec.diogo.safetysec.data.repository.RulesRepository
+import pt.isec.diogo.safetysec.services.BackgroundLocationService
 import pt.isec.diogo.safetysec.ui.components.DrawerScaffold
 import pt.isec.diogo.safetysec.ui.screens.monitor.getRuleTypeDisplayName
+import android.content.Context
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun MyRulesScreen(
@@ -136,6 +140,7 @@ fun MyRulesScreen(
                         )
                     }
                     items(regularRules) { (rule, assignment) ->
+                        val context = LocalContext.current
                         MyRuleCard(
                             rule = rule,
                             assignment = assignment,
@@ -143,6 +148,12 @@ fun MyRulesScreen(
                                 scope.launch {
                                     rulesRepository.updateAssignment(assignment.copy(isAccepted = accepted))
                                     loadRules()
+                                    // Recarregar regras no serviço se estiver a correr
+                                    if (BackgroundLocationService.isServiceRunning) {
+                                        val intent = Intent(context, BackgroundLocationService::class.java)
+                                        intent.action = BackgroundLocationService.ACTION_RELOAD_RULES
+                                        context.startService(intent)
+                                    }
                                 }
                             },
                             onEdit = { onEditRule(assignment.id) }
@@ -161,6 +172,7 @@ fun MyRulesScreen(
                         )
                     }
                     items(safeZones) { (rule, assignment) ->
+                        val context = LocalContext.current
                         MyRuleCard(
                             rule = rule,
                             assignment = assignment,
@@ -168,6 +180,12 @@ fun MyRulesScreen(
                                 scope.launch {
                                     rulesRepository.updateAssignment(assignment.copy(isAccepted = accepted))
                                     loadRules()
+                                    // Recarregar regras no serviço se estiver a correr
+                                    if (BackgroundLocationService.isServiceRunning) {
+                                        val intent = Intent(context, BackgroundLocationService::class.java)
+                                        intent.action = BackgroundLocationService.ACTION_RELOAD_RULES
+                                        context.startService(intent)
+                                    }
                                 }
                             },
                             onEdit = { onEditRule(assignment.id) }
