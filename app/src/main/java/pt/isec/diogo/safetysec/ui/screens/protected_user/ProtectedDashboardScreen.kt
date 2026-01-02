@@ -34,7 +34,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -43,6 +48,8 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import pt.isec.diogo.safetysec.R
 import pt.isec.diogo.safetysec.data.model.User
+import pt.isec.diogo.safetysec.data.repository.AssociationRepository
+import pt.isec.diogo.safetysec.data.repository.RulesRepository
 import pt.isec.diogo.safetysec.ui.components.AppDrawer
 
 /**
@@ -52,6 +59,7 @@ import pt.isec.diogo.safetysec.ui.components.AppDrawer
 @Composable
 fun ProtectedDashboardScreen(
     currentUser: User?,
+    currentUserId: String?,
     currentRoute: String,
     isMonitoringActive: Boolean = false,
     onNavigate: (String) -> Unit,
@@ -62,6 +70,29 @@ fun ProtectedDashboardScreen(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    
+    val associationRepository = remember { AssociationRepository() }
+    val rulesRepository = remember { RulesRepository() }
+    
+    var monitorsCount by remember { mutableStateOf(0) }
+    var activeRulesCount by remember { mutableStateOf(0) }
+
+    // Fetch data
+    LaunchedEffect(currentUserId) {
+        if (currentUserId != null) {
+            // Get monitors count
+            associationRepository.getMyMonitors(currentUserId).onSuccess { monitors ->
+                monitorsCount = monitors.size
+            }
+            
+            // Get active rules count
+            rulesRepository.getAssignmentsForProtected(currentUserId).onSuccess { rulesWithAssignments ->
+                activeRulesCount = rulesWithAssignments.count { (rule, assignment) ->
+                    assignment.isAccepted && rule.isActive
+                }
+            }
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -162,7 +193,7 @@ fun ProtectedDashboardScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "0",
+                                text = monitorsCount.toString(),
                                 style = MaterialTheme.typography.headlineLarge,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -188,7 +219,7 @@ fun ProtectedDashboardScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "0",
+                                text = activeRulesCount.toString(),
                                 style = MaterialTheme.typography.headlineLarge,
                                 color = MaterialTheme.colorScheme.primary
                             )

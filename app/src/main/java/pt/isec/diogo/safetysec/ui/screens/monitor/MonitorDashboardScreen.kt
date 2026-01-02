@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -34,7 +35,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -43,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import pt.isec.diogo.safetysec.R
 import pt.isec.diogo.safetysec.data.model.User
+import pt.isec.diogo.safetysec.data.repository.AssociationRepository
 import pt.isec.diogo.safetysec.ui.components.AppDrawer
 
 /**
@@ -52,6 +59,7 @@ import pt.isec.diogo.safetysec.ui.components.AppDrawer
 @Composable
 fun MonitorDashboardScreen(
     currentUser: User?,
+    currentUserId: String?,
     currentRoute: String,
     onNavigate: (String) -> Unit,
     onSwitchProfile: () -> Unit,
@@ -59,9 +67,32 @@ fun MonitorDashboardScreen(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    
+    val associationRepository = remember { AssociationRepository() }
+    
+    var protectedUsers by remember { mutableStateOf<List<ProtectedUserItem>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
 
-    // TODO: Get from repository
-    val protectedUsers = emptyList<ProtectedUserItem>()
+    // Fetch protected users
+    LaunchedEffect(currentUserId) {
+        if (currentUserId != null) {
+            isLoading = true
+            associationRepository.getMyProtectedUsers(currentUserId).onSuccess { users ->
+                val items = users.map { user ->
+                    ProtectedUserItem(
+                        uid = user.uid,
+                        displayName = user.displayName,
+                        lastLocation = null,
+                        lastUpdateTime = null,
+                        isOnline = true,
+                        hasActiveAlert = false // TODO: implementar check de alertas ativos
+                    )
+                }
+                protectedUsers = items
+            }
+            isLoading = false
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -117,48 +148,59 @@ fun MonitorDashboardScreen(
                     )
                 }
 
-                if (protectedUsers.isEmpty()) {
-                    // se nao tiver nenhum associado
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(32.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                when {
+                    isLoading -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = null,
-                                modifier = Modifier.size(64.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                            )
-                            Text(
-                                text = stringResource(R.string.no_protected_users),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = stringResource(R.string.add_protected_hint),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                            )
+                            CircularProgressIndicator()
                         }
                     }
-                } else {
-                    // lista de protected users
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(protectedUsers) { protectedUser ->
-                            ProtectedUserCard(protectedUser = protectedUser)
+                    protectedUsers.isEmpty() -> {
+                        // se nao tiver nenhum associado
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(64.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                )
+                                Text(
+                                    text = stringResource(R.string.no_protected_users),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = stringResource(R.string.add_protected_hint),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                )
+                            }
                         }
-                        item { Spacer(modifier = Modifier.height(16.dp)) }
+                    }
+                    else -> {
+                        // lista de protected users
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(protectedUsers) { protectedUser ->
+                                ProtectedUserCard(protectedUser = protectedUser)
+                            }
+                            item { Spacer(modifier = Modifier.height(16.dp)) }
+                        }
                     }
                 }
             }

@@ -254,6 +254,7 @@ class MainActivity : ComponentActivity() {
                             currentMonitorRoute = MonitorScreen.Dashboard.route
                             MonitorDashboardScreen(
                                 currentUser = authViewModel.currentUser,
+                                currentUserId = authViewModel.currentUser?.uid,
                                 currentRoute = currentMonitorRoute,
                                 onNavigate = { route ->
                                     currentMonitorRoute = route
@@ -519,6 +520,7 @@ class MainActivity : ComponentActivity() {
                             currentProtectedRoute = ProtectedScreen.Dashboard.route
                             ProtectedDashboardScreen(
                                 currentUser = authViewModel.currentUser,
+                                currentUserId = authViewModel.currentUser?.uid,
                                 currentRoute = currentProtectedRoute,
                                 isMonitoringActive = isMonitoringActive,
                                 onNavigate = { route ->
