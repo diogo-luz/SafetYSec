@@ -12,6 +12,7 @@ composeBom = "2025.12.01"
 lifecycleViewmodelCompose = "2.10.0"
 mapsCompose = "7.0.0"
 navigationCompose = "2.9.6"
+playServicesAuth = "21.4.0"
 playServicesLocation = "21.3.0"
 cameraX = "1.5.2"
 media3 = "1.9.0"
@@ -40,6 +41,7 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
+play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 camera-core = { module = "androidx.camera:camera-core", version.ref = "cameraX" }
 camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraX" }

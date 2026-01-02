@@ -175,6 +175,45 @@ class AuthViewModel(
         }
     }
 
+    fun signInWithGoogle(idToken: String, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            isLoading = true
+            error = null
+
+            authRepository.signInWithGoogle(idToken)
+                .onSuccess { user ->
+                    currentUser = user
+                    isAuthenticated = true
+                    onSuccess()
+                }
+                .onFailure { exception ->
+                    error = exception.message ?: "Google Sign-In failed"
+                }
+
+            isLoading = false
+        }
+    }
+
+    fun changePassword(newPassword: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        if (newPassword.length < 6) {
+            onError("Password must be at least 6 characters")
+            return
+        }
+
+        viewModelScope.launch {
+            isLoading = true
+            authRepository.changePassword(newPassword)
+                .onSuccess {
+                    isLoading = false
+                    onSuccess()
+                }
+                .onFailure { exception ->
+                    isLoading = false
+                    onError(exception.message ?: "Failed to change password")
+                }
+        }
+    }
+
     private fun clearFormFields() {
         email = ""
         password = ""

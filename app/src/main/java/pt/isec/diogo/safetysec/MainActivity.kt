@@ -336,6 +336,9 @@ class MainActivity : ComponentActivity() {
                                             authViewModel.refreshUser()
                                         }
                                     }
+                                },
+                                onChangePassword = { newPassword, onSuccess, onError ->
+                                    authViewModel.changePassword(newPassword, onSuccess, onError)
                                 }
                             )
                         }
@@ -622,6 +625,9 @@ class MainActivity : ComponentActivity() {
                                             authViewModel.refreshUser()
                                         }
                                     }
+                                },
+                                onChangePassword = { newPassword, onSuccess, onError ->
+                                    authViewModel.changePassword(newPassword, onSuccess, onError)
                                 }
                             )
                         }

@@ -2,6 +2,7 @@ package pt.isec.diogo.safetysec.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import pt.isec.diogo.safetysec.data.model.User
@@ -105,6 +106,41 @@ class AuthRepository {
     }
 
     /**
+     * Autentica um utilizador com Google Sign-In.
+     */
+    suspend fun signInWithGoogle(idToken: String): Result<User> {
+        return try {
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            val authResult = auth.signInWithCredential(credential).await()
+            val firebaseUser = authResult.user
+                ?: return Result.failure(Exception("Google Sign-In failed: user is null"))
+
+            // Vai buscar ou criar o documento de utilizador do Firestore
+            val document = usersCollection.document(firebaseUser.uid).get().await()
+
+            if (document.exists()) {
+                val user = User.fromMap(document.data ?: emptyMap())
+                Result.success(user)
+            } else {
+                // O documento do utilizador não existe, criamos um com os valores por defeito
+                val user = User(
+                    uid = firebaseUser.uid,
+                    email = firebaseUser.email ?: "",
+                    displayName = firebaseUser.displayName ?: "",
+                    cancellationPin = "0000",
+                    cancellationTimer = 10
+                )
+                usersCollection.document(firebaseUser.uid)
+                    .set(user.toMap())
+                    .await()
+                Result.success(user)
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
      * Termina a sessão do utilizador atual.
      */
     fun logout() {
@@ -128,6 +164,21 @@ class AuthRepository {
             } else {
                 Result.failure(Exception("User document not found"))
             }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Altera a password do utilizador atual.
+     */
+    suspend fun changePassword(newPassword: String): Result<Unit> {
+        val firebaseUser = auth.currentUser
+            ?: return Result.failure(Exception("No authenticated user"))
+
+        return try {
+            firebaseUser.updatePassword(newPassword).await()
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }

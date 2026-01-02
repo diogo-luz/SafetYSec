@@ -215,4 +215,14 @@
     <string name="rule_not_found">Regra não encontrada</string>
     <string name="speed_limit_value">Máx: %1$d km/h</string>
     <string name="inactivity_value">Após: %1$d min</string>
+    
+    <!-- Password Change -->
+    <string name="change_password">Alterar Password</string>
+    <string name="new_password">Nova Password</string>
+    <string name="confirm_new_password">Confirmar Nova Password</string>
+    <string name="password_changed_success">Password alterada com sucesso</string>
+    
+    <!-- Google Sign-In -->
+    <string name="sign_in_with_google">Entrar com conta Google</string>
+    <string name="or">ou</string>
 </resources>

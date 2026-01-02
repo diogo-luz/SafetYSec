@@ -256,7 +256,7 @@ private fun AlertDetailContent(
                 fontWeight = FontWeight.Medium
             )
             
-            val position = LatLng(alert.latitude!!, alert.longitude!!)
+            val position = LatLng(alert.latitude, alert.longitude)
             val cameraPositionState = rememberCameraPositionState {
                 this.position = CameraPosition.fromLatLngZoom(position, 15f)
             }
@@ -316,7 +316,7 @@ private fun AlertDetailContent(
 
         if (alert.videoUrl != null) {
             VideoPlayerComponent(
-                videoUrl = alert.videoUrl!!,
+                videoUrl = alert.videoUrl,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(250.dp)

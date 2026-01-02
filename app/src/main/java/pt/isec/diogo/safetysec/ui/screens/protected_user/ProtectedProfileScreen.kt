@@ -14,7 +14,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -44,7 +46,8 @@ fun ProtectedProfileScreen(
     onNavigate: (String) -> Unit,
     onSwitchProfile: () -> Unit,
     onLogout: () -> Unit,
-    onSaveProfile: (displayName: String, pin: String, timer: Int) -> Unit
+    onSaveProfile: (displayName: String, pin: String, timer: Int) -> Unit,
+    onChangePassword: (String, () -> Unit, (String) -> Unit) -> Unit
 ) {
     var displayName by remember { mutableStateOf(currentUser?.displayName ?: "") }
     var cancellationPin by remember { mutableStateOf(currentUser?.cancellationPin ?: "0000") }
@@ -52,6 +55,13 @@ fun ProtectedProfileScreen(
         mutableFloatStateOf((currentUser?.cancellationTimer ?: 10).toFloat()) 
     }
     var isEditing by remember { mutableStateOf(false) }
+    
+    // Password change state
+    var showPasswordChange by remember { mutableStateOf(false) }
+    var newPassword by remember { mutableStateOf("") }
+    var confirmNewPassword by remember { mutableStateOf("") }
+    var passwordError by remember { mutableStateOf<String?>(null) }
+    var passwordSuccess by remember { mutableStateOf(false) }
 
     DrawerScaffold(
         currentUser = currentUser,
@@ -164,8 +174,6 @@ fun ProtectedProfileScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
             // Save button
             if (isEditing) {
                 Button(
@@ -176,6 +184,105 @@ fun ProtectedProfileScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(stringResource(R.string.save))
+                }
+            }
+
+            HorizontalDivider()
+
+            // Change Password Section
+            Text(
+                text = stringResource(R.string.change_password),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            if (!showPasswordChange) {
+                OutlinedButton(
+                    onClick = { showPasswordChange = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.change_password))
+                }
+            } else {
+                OutlinedTextField(
+                    value = newPassword,
+                    onValueChange = { 
+                        newPassword = it
+                        passwordError = null
+                        passwordSuccess = false
+                    },
+                    label = { Text(stringResource(R.string.new_password)) },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                OutlinedTextField(
+                    value = confirmNewPassword,
+                    onValueChange = { 
+                        confirmNewPassword = it
+                        passwordError = null
+                    },
+                    label = { Text(stringResource(R.string.confirm_new_password)) },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                if (passwordError != null) {
+                    Text(
+                        text = passwordError!!,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                if (passwordSuccess) {
+                    Text(
+                        text = stringResource(R.string.password_changed_success),
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                Button(
+                    onClick = {
+                        if (newPassword.length < 6) {
+                            passwordError = "Password must be at least 6 characters"
+                            return@Button
+                        }
+                        if (newPassword != confirmNewPassword) {
+                            passwordError = "Passwords do not match"
+                            return@Button
+                        }
+                        onChangePassword(
+                            newPassword,
+                            {
+                                passwordSuccess = true
+                                newPassword = ""
+                                confirmNewPassword = ""
+                                showPasswordChange = false
+                            },
+                            { error -> passwordError = error }
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.save))
+                }
+
+                OutlinedButton(
+                    onClick = {
+                        showPasswordChange = false
+                        newPassword = ""
+                        confirmNewPassword = ""
+                        passwordError = null
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.cancel))
                 }
             }
         }
