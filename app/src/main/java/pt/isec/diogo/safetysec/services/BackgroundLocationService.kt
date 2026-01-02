@@ -13,6 +13,7 @@ import android.hardware.SensorManager
 import android.location.Location
 import android.os.Build
 import android.os.CountDownTimer
+import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
@@ -41,6 +42,7 @@ import pt.isec.diogo.safetysec.data.repository.AuthRepository
 import pt.isec.diogo.safetysec.data.repository.RulesRepository
 import pt.isec.diogo.safetysec.utils.GeofenceChecker
 import com.google.firebase.auth.FirebaseAuth
+import kotlin.math.abs
 import kotlin.math.sqrt
 
 class BackgroundLocationService : Service(), SensorEventListener {
@@ -77,6 +79,9 @@ class BackgroundLocationService : Service(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
     private var accelerometer: Sensor? = null
     
+    // Delta G-Force (inicializar a 1.0 = gravidade padrão para evitar falso positivo na 1ª leitura)
+    private var lastGForce: Double = 1.0
+    
     private var lastLocation: Location? = null
     private var geofenceRules: List<Rule> = emptyList()
     private var speedLimitKmh: Double? = null
@@ -84,6 +89,18 @@ class BackgroundLocationService : Service(), SensorEventListener {
     // Flags de regras de sensores (para bateria!)
     private var isFallDetectionActive = false
     private var isAccidentDetectionActive = false
+    
+    // Inatividade
+    private var isInactivityMonitorActive = false
+    private var inactivityThresholdMinutes: Double? = null
+    private var lastMovementTime: Long = 0
+    private val inactivityHandler = Handler(Looper.getMainLooper())
+    private val inactivityRunnable = object : Runnable {
+        override fun run() {
+            checkInactivity()
+            inactivityHandler.postDelayed(this, 60000) // Verificar a cada 1 minuto
+        }
+    }
     
     private var currentUserId: String? = null
     private var currentUser: User? = null
@@ -119,6 +136,9 @@ class BackgroundLocationService : Service(), SensorEventListener {
         currentUserId = FirebaseAuth.getInstance().currentUser?.uid
         
         createNotificationChannel()
+        
+        // iniciar timestamp de movimento
+        lastMovementTime = System.currentTimeMillis()
     }
     
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -135,7 +155,8 @@ class BackgroundLocationService : Service(), SensorEventListener {
     override fun onDestroy() {
         super.onDestroy()
         stopLocationUpdates()
-        stopSensorMonitoring() // Garante que para sensores
+        stopSensorMonitoring() 
+        inactivityHandler.removeCallbacks(inactivityRunnable)
         countdownTimer?.cancel()
         isCountdownActive = false
         isServiceRunning = false
@@ -145,21 +166,24 @@ class BackgroundLocationService : Service(), SensorEventListener {
     private fun startLocationMonitoring() {
         Log.d(TAG, "Starting location monitoring")
         isServiceRunning = true
+        lastMovementTime = System.currentTimeMillis() // Reset movement timer quando começa
         
         val notification = createNotification()
         startForeground(NOTIFICATION_ID, notification)
         
         loadUserAndRules()
         startLocationUpdates()
+        // Inicia loop de inatividade
+        inactivityHandler.post(inactivityRunnable)
     }
     
     private fun startSensorMonitoring() {
         if (accelerometer == null) return
         
         try {
-            sensorManager.unregisterListener(this) // Limpar primeiro
+            sensorManager.unregisterListener(this) 
             sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI)
-            Log.d(TAG, "Sensor monitoring started (Fall: $isFallDetectionActive, Accident: $isAccidentDetectionActive)")
+            Log.d(TAG, "Sensor monitoring started (Fall: $isFallDetectionActive, Accident: $isAccidentDetectionActive, Inactivity: $isInactivityMonitorActive)")
         } catch (e: Exception) {
             Log.e(TAG, "Error starting sensor monitoring", e)
         }
@@ -178,19 +202,31 @@ class BackgroundLocationService : Service(), SensorEventListener {
         event?.let {
             if (it.sensor.type == Sensor.TYPE_ACCELEROMETER) {
                 if (isAlertTriggered || isCountdownActive) return
-                if (System.currentTimeMillis() - lastSensorTriggerTime < SENSOR_COOLDOWN_MS) return
                 
                 val x = it.values[0]
                 val y = it.values[1]
                 val z = it.values[2]
                 
-                // força-g -> aula teórica
+                // Força-G Atual
                 val magnitude = sqrt(x * x + y * y + z * z)
                 val gForce = magnitude / 9.81
                 
+                // Deteção de Movimento para Inatividade (Delta G-Force)
+                if (isInactivityMonitorActive) {
+                    val delta = abs(gForce - lastGForce)
+                    if (delta > 0.5) { // Movimento significativo
+                         lastMovementTime = System.currentTimeMillis()
+                         Log.v(TAG, "Motion detected due to delta G: $delta")
+                    }
+                    lastGForce = gForce
+                }
+                
+                // Cooldown para alertas de sensores (Queda/Acidente)
+                if (System.currentTimeMillis() - lastSensorTriggerTime < SENSOR_COOLDOWN_MS) return
+                
                 // Thresholds
-                val FALL_THRESHOLD_G = 2.5 // Queda (~2.5G)
-                val ACCIDENT_THRESHOLD_G = 4.0 // Acidente (~4.0G)
+                val FALL_THRESHOLD_G = 2.5 // Queda
+                val ACCIDENT_THRESHOLD_G = 4.0 // Acidente
                 
                 when {
                     isAccidentDetectionActive && gForce > ACCIDENT_THRESHOLD_G -> {
@@ -218,47 +254,43 @@ class BackgroundLocationService : Service(), SensorEventListener {
         // Reset flags
         isFallDetectionActive = false
         isAccidentDetectionActive = false
+        isInactivityMonitorActive = false
+        inactivityThresholdMinutes = null
+        
         geofenceRules = emptyList()
         speedLimitKmh = null
         
         serviceScope.launch {
-            // Carregar dados (nome e cancellationTimer)
             authRepository.getCurrentUser().onSuccess { user ->
                 currentUser = user
-                Log.d(TAG, "Loaded user: ${user.displayName}, timer: ${user.cancellationTimer}s")
-            }.onFailure {
-                Log.e(TAG, "Failed to load user", it)
             }
             
-            // Carregar regras do user
             rulesRepository.getAssignmentsForProtected(userId).onSuccess { rulesWithAssignments ->
                 rulesWithAssignments.forEach { (rule, assignment) ->
                     if (assignment.isAccepted && rule.isActive) {
                         when (rule.type) {
                             RuleType.SPEED_LIMIT -> {
                                 speedLimitKmh = rule.threshold
-                                Log.d(TAG, "Speed limit set to $speedLimitKmh km/h")
+                                Log.d(TAG, "Speed limit: $speedLimitKmh km/h")
                             }
                             RuleType.GEOFENCE -> {
                                 geofenceRules = geofenceRules + rule
                                 Log.d(TAG, "Added geofence: ${rule.name}")
                             }
-                            RuleType.FALL_DETECTION -> {
-                                isFallDetectionActive = true
-                                Log.d(TAG, "Fall Detection Active")
-                            }
-                            RuleType.ACCIDENT_DETECTION -> {
-                                isAccidentDetectionActive = true
-                                Log.d(TAG, "Accident Detection Active")
+                            RuleType.FALL_DETECTION -> isFallDetectionActive = true
+                            RuleType.ACCIDENT_DETECTION -> isAccidentDetectionActive = true
+                            RuleType.INACTIVITY -> {
+                                isInactivityMonitorActive = true
+                                inactivityThresholdMinutes = rule.threshold
+                                Log.d(TAG, "Inactivity Monitor Active: $inactivityThresholdMinutes min")
                             }
                             else -> {}
                         }
                     }
                 }
-                Log.d(TAG, "Loaded Rules: Geo(${geofenceRules.size}), Speed($speedLimitKmh), Fall($isFallDetectionActive), Accident($isAccidentDetectionActive)")
                 
-                // Ativar/Desativar sensores com base nas regras
-                if (isFallDetectionActive || isAccidentDetectionActive) {
+                // Ativar sensores se qualquer regra que precise deles estiver ativa
+                if (isFallDetectionActive || isAccidentDetectionActive || isInactivityMonitorActive) {
                     startSensorMonitoring()
                 } else {
                     stopSensorMonitoring()
@@ -285,13 +317,48 @@ class BackgroundLocationService : Service(), SensorEventListener {
     }
     
     private fun onLocationUpdate(location: Location) {
-        // Não verificar regras se já há alerta ativo ou countdown
         if (isAlertTriggered || isCountdownActive) return
+        
+        // Deteta movimento pelo GPS (speed está em m/s, 1.5 m/s ≈ 5.4 km/h = caminhada)
+        if (isInactivityMonitorActive) {
+            val speedKmh = location.speed * 3.6
+            if (speedKmh > 5.0) { // > 5 km/h para evitar GPS drift
+                Log.d(TAG, "GPS motion detected: $speedKmh km/h")
+                lastMovementTime = System.currentTimeMillis()
+            }
+        }
         
         checkGeofence(location)
         checkSpeed(location)
         
         lastLocation = location
+    }
+    
+    private fun checkInactivity() {
+        if (!isServiceRunning) {
+            Log.d(TAG, "checkInactivity: service not running")
+            return
+        }
+        if (!isInactivityMonitorActive) {
+            Log.d(TAG, "checkInactivity: inactivity monitor not active")
+            return
+        }
+        if (isAlertTriggered || isCountdownActive) {
+            Log.d(TAG, "checkInactivity: alert in progress")
+            return
+        }
+        
+        val thresholdMin = inactivityThresholdMinutes ?: return
+        val thresholdMs = (thresholdMin * 60 * 1000).toLong()
+        val timeSinceLastMove = System.currentTimeMillis() - lastMovementTime
+        
+        Log.d(TAG, "checkInactivity: timeSinceLastMove=${timeSinceLastMove/1000}s, threshold=${thresholdMs/1000}s")
+        
+        if (timeSinceLastMove >= thresholdMs) {
+            Log.w(TAG, "Inactivity Detected! No movement for ${timeSinceLastMove/1000}s")
+            lastMovementTime = System.currentTimeMillis() 
+            triggerAlert(AlertTriggerType.INACTIVITY)
+        }
     }
     
     private fun checkGeofence(location: Location) {
@@ -314,7 +381,7 @@ class BackgroundLocationService : Service(), SensorEventListener {
         val speedKmh = location.speed * 3.6
         
         if (speedKmh > limit) {
-            Log.w(TAG, "Speed limit exceeded: $speedKmh km/h (limit: $limit)")
+            Log.w(TAG, "Speed limit exceeded: $speedKmh km/h")
             triggerAlert(AlertTriggerType.SPEED_LIMIT)
         }
     }
@@ -325,7 +392,6 @@ class BackgroundLocationService : Service(), SensorEventListener {
         isCountdownActive = true
         pendingTriggerType = triggerType
         
-        // Usar cancellationTimer do utilizador (default 10s)
         val timerSeconds = currentUser?.cancellationTimer ?: 10
         val timerMs = timerSeconds * 1000L
         
@@ -355,17 +421,16 @@ class BackgroundLocationService : Service(), SensorEventListener {
         pendingTriggerType = null
         isCountdownActive = false
         currentSecondsLeft = 0
+        lastMovementTime = System.currentTimeMillis() // Reset inactivity on interaction
         
-        // Remover notificação de alerta
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(ALERT_NOTIFICATION_ID)
         
-        // Cooldown antes de poder disparar outro alerta
         isAlertTriggered = true
         android.os.Handler(Looper.getMainLooper()).postDelayed({
             isAlertTriggered = false
-            Log.d(TAG, "Cooldown ended - ready for new alerts")
-        }, 30000) // 30 segundos de cooldown
+            Log.d(TAG, "Cooldown ended")
+        }, 30000)
     }
     
     private fun createAlertAndNotify(triggerType: AlertTriggerType) {
@@ -391,11 +456,10 @@ class BackgroundLocationService : Service(), SensorEventListener {
                 Log.e(TAG, "Failed to create alert", e)
             }
             
-            // Cooldown antes de poder disparar outro alerta
             android.os.Handler(Looper.getMainLooper()).postDelayed({
                 isAlertTriggered = false
-                Log.d(TAG, "Cooldown ended - ready for new alerts")
-            }, 60000) // 60 segundos de cooldown
+                Log.d(TAG, "Cooldown ended")
+            }, 60000)
         }
     }
     
@@ -405,6 +469,7 @@ class BackgroundLocationService : Service(), SensorEventListener {
             AlertTriggerType.SPEED_LIMIT -> "Speed Limit Exceeded!"
             AlertTriggerType.FALL_DETECTION -> "Fall Detected!"
             AlertTriggerType.ACCIDENT_DETECTION -> "Accident Detected!"
+            AlertTriggerType.INACTIVITY -> "Inactivity Alert!"
             else -> "Safety Alert!"
         }
         
@@ -446,6 +511,7 @@ class BackgroundLocationService : Service(), SensorEventListener {
             AlertTriggerType.SPEED_LIMIT -> "Alert Sent - Speed Limit"
             AlertTriggerType.FALL_DETECTION -> "Alert Sent - Fall Detected"
             AlertTriggerType.ACCIDENT_DETECTION -> "Alert Sent - Accident Detected"
+            AlertTriggerType.INACTIVITY -> "Alert Sent - Inactivity"
             else -> "Alert Sent"
         }
         
