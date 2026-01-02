@@ -225,4 +225,10 @@
     <!-- Google Sign-In -->
     <string name="sign_in_with_google">Entrar com conta Google</string>
     <string name="or">ou</string>
+    
+    <!-- Forgot Password -->
+    <string name="forgot_password">Esqueceu a palavra-passe?</string>
+    <string name="forgot_password_description">Introduza o seu email e enviaremos um link para repor a sua palavra-passe.</string>
+    <string name="reset_email_sent">Email de reposição enviado! Verifique a sua caixa de entrada.</string>
+    <string name="send">Enviar</string>
 </resources>

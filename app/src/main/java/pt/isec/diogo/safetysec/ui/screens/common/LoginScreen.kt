@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -28,6 +29,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -54,6 +59,12 @@ fun LoginScreen(
 ) {
     val context = LocalContext.current
     
+    // Forgot password dialog state
+    var showForgotPasswordDialog by remember { mutableStateOf(false) }
+    var forgotPasswordEmail by remember { mutableStateOf("") }
+    var forgotPasswordMessage by remember { mutableStateOf<String?>(null) }
+    var forgotPasswordError by remember { mutableStateOf<String?>(null) }
+    
     // Google Sign-In launcher
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -74,6 +85,93 @@ fun LoginScreen(
     LaunchedEffect(Unit) {
         viewModel.clearError()
     }
+    
+    // Forgot Password Dialog
+    if (showForgotPasswordDialog) {
+        AlertDialog(
+            onDismissRequest = { 
+                showForgotPasswordDialog = false
+                forgotPasswordEmail = ""
+                forgotPasswordMessage = null
+                forgotPasswordError = null
+            },
+            title = { Text(stringResource(R.string.forgot_password)) },
+            text = {
+                Column {
+                    Text(
+                        text = stringResource(R.string.forgot_password_description),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = forgotPasswordEmail,
+                        onValueChange = { 
+                            forgotPasswordEmail = it
+                            forgotPasswordError = null
+                        },
+                        label = { Text(stringResource(R.string.email)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                        singleLine = true
+                    )
+                    forgotPasswordError?.let { error ->
+                        Text(
+                            text = error,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+                    forgotPasswordMessage?.let { message ->
+                        Text(
+                            text = message,
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.sendPasswordResetEmail(
+                            email = forgotPasswordEmail,
+                            onSuccess = {
+                                forgotPasswordMessage = context.getString(R.string.reset_email_sent)
+                                forgotPasswordError = null
+                            },
+                            onError = { error ->
+                                forgotPasswordError = error
+                                forgotPasswordMessage = null
+                            }
+                        )
+                    },
+                    enabled = !viewModel.isLoading
+                ) {
+                    if (viewModel.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(stringResource(R.string.send))
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    showForgotPasswordDialog = false
+                    forgotPasswordEmail = ""
+                    forgotPasswordMessage = null
+                    forgotPasswordError = null
+                }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
 
     Column(
         modifier = Modifier
@@ -142,7 +240,22 @@ fun LoginScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        // Forgot Password link
+        TextButton(
+            onClick = { 
+                showForgotPasswordDialog = true
+                forgotPasswordEmail = viewModel.email
+            },
+            modifier = Modifier.align(Alignment.End),
+            enabled = !viewModel.isLoading
+        ) {
+            Text(
+                text = stringResource(R.string.forgot_password),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Login button
         Button(

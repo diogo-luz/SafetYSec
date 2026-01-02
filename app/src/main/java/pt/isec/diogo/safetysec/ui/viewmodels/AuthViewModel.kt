@@ -214,6 +214,26 @@ class AuthViewModel(
         }
     }
 
+    fun sendPasswordResetEmail(email: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        if (email.isBlank()) {
+            onError("Please enter your email")
+            return
+        }
+
+        viewModelScope.launch {
+            isLoading = true
+            authRepository.sendPasswordResetEmail(email)
+                .onSuccess {
+                    isLoading = false
+                    onSuccess()
+                }
+                .onFailure { exception ->
+                    isLoading = false
+                    onError(exception.message ?: "Failed to send reset email")
+                }
+        }
+    }
+
     private fun clearFormFields() {
         email = ""
         password = ""
@@ -221,3 +241,4 @@ class AuthViewModel(
         displayName = ""
     }
 }
+
