@@ -17,8 +17,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Rule
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GroupAdd
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -27,7 +27,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -60,6 +59,7 @@ fun RulesScreen(
     onSwitchProfile: () -> Unit,
     onLogout: () -> Unit,
     onCreateRule: () -> Unit,
+    onEditRule: (String) -> Unit,
     onAssignRule: (String) -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -168,12 +168,7 @@ fun RulesScreen(
                 items(rules) { rule ->
                     RuleCard(
                         rule = rule,
-                        onToggleActive = { active ->
-                            scope.launch {
-                                rulesRepository.updateRule(rule.copy(isActive = active))
-                                loadRules()
-                            }
-                        },
+                        onEdit = { onEditRule(rule.id) },
                         onAssign = { onAssignRule(rule.id) },
                         onDelete = { ruleToDelete = rule }
                     )
@@ -188,7 +183,7 @@ fun RulesScreen(
 @Composable
 private fun RuleCard(
     rule: Rule,
-    onToggleActive: (Boolean) -> Unit,
+    onEdit: () -> Unit,
     onAssign: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -221,11 +216,11 @@ private fun RuleCard(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            IconButton(onClick = onDelete) {
+            IconButton(onClick = onEdit) {
                 Icon(
-                    Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.delete),
-                    tint = MaterialTheme.colorScheme.error
+                    Icons.Default.Edit,
+                    contentDescription = stringResource(R.string.edit),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -237,10 +232,13 @@ private fun RuleCard(
                 )
             }
 
-            Switch(
-                checked = rule.isActive,
-                onCheckedChange = onToggleActive
-            )
+            IconButton(onClick = onDelete) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = stringResource(R.string.delete),
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
         }
     }
 }

@@ -210,4 +210,7 @@
     <string name="my_protected_users">Os Meus Protegidos</string>
     <string name="status_alert">Alerta!</string>
     <string name="recent_alerts">Alertas Recentes</string>
+    <string name="edit_rule">Editar Regra</string>
+    <string name="rule_active">Ativa</string>
+    <string name="rule_not_found">Regra não encontrada</string>
 </resources>

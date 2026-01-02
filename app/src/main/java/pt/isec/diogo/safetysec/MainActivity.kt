@@ -38,6 +38,7 @@ import pt.isec.diogo.safetysec.ui.screens.common.RegisterScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.AddProtectedScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.AssignRuleScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.CreateRuleScreen
+import pt.isec.diogo.safetysec.ui.screens.monitor.EditRuleScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.CreateSafeZoneScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.MonitorDashboardScreen
 import pt.isec.diogo.safetysec.ui.screens.monitor.MonitorProfileScreen
@@ -424,6 +425,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 onCreateRule = { navController.navigate("monitor_create_rule") },
+                                onEditRule = { ruleId -> navController.navigate("monitor_edit_rule/$ruleId") },
                                 onAssignRule = { ruleId -> navController.navigate("monitor_assign_rule/$ruleId") }
                             )
                         }
@@ -432,6 +434,17 @@ class MainActivity : ComponentActivity() {
                         composable("monitor_create_rule") {
                             CreateRuleScreen(
                                 currentUserId = authViewModel.currentUser?.uid,
+                                rulesRepository = app.rulesRepository,
+                                onNavigateBack = { navController.popBackStack() },
+                                onSuccess = { navController.popBackStack() }
+                            )
+                        }
+                        
+                        // Edit Rule (Monitor)
+                        composable("monitor_edit_rule/{ruleId}") { backStackEntry ->
+                            val ruleId = backStackEntry.arguments?.getString("ruleId") ?: ""
+                            EditRuleScreen(
+                                ruleId = ruleId,
                                 rulesRepository = app.rulesRepository,
                                 onNavigateBack = { navController.popBackStack() },
                                 onSuccess = { navController.popBackStack() }
