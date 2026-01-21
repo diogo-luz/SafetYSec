@@ -47,7 +47,7 @@
 
     <!-- Protected Dashboard -->
     <string name="protected_dashboard_title">My Safety</string>
-    <string name="status_safe">You are Safe</string>
+    <string name="status_safe">Safe</string>
     <string name="all_systems_normal">All systems are normal</string>
     <string name="monitors_active">Active Monitors</string>
     <string name="rules_active">Active Rules</string>
